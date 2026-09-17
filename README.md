@@ -4,16 +4,13 @@
 
 ## 👥 Thành viên nhóm & Phân công vai trò
 
-**Lớp:** 3A · **Phòng:** E402 · **Cụm:** ____ · **Track:** C1
+**Lớp:** 3B · **Phòng:** E402 · **Cụm:** C3 · **Track:** C1
 
 | Họ và Tên | Mã Học Viên | Vai trò chính | Phần việc đảm nhiệm trong dự án |
 |---|---|---|---|
-| Nguyễn Hà Khuê | 2A202602938 |  |  |
-| Nguyễn Huy Hoàng | 2A202602738 |  |  |
-| Nguyễn Hoàng Anh | 2A202602811 |  |  |
-|  |  |  |  |
-
-> Nhóm copy nguyên file README này về repo của mình, rồi điền bảng trên. Cột **Phần việc đảm nhiệm** ghi càng cụ thể càng tốt.
+| Nguyễn Hà Khuê | 2A202602938 |  Data & Knowledge Graph| Extract nội dung từ slide; xác định topic/concept và quan hệ; xây knowledge graph; gắn provenance/mã nguồn; chuẩn bị bộ dữ liệu kiểm thử chuẩn. |
+| Nguyễn Huy Hoàng | 2A202602738 | UI & Evaluation | Xây UI cấu hình quiz và màn hình duyệt câu hỏi; hiển thị topic và nguồn; thiết kế tiêu chí evaluation; user test; tổng hợp feedback; chuẩn bị demo và changelog. |
+| Nguyễn Hoàng Anh | 2A202602811 | AI & Backend | Thiết kế prompt và logic sinh quiz; chọn concept theo số câu/độ khó/topic; sinh câu hỏi, đáp án và distractor; xây backend/API; validate output và kiểm tra điều kiện đủ nguồn trước khi generate. |
 
 - Thời lượng: **47,5 giờ** từ phát đề đến thuyết trình (ca 3A) — LAB 5 (phát đề + build) · LEC 6 (tiếp tục build theo ca) · LAB 6 (vòng thi)
 - Nhóm: **3-4 người** · thi theo phòng (E403 / E402), chia cụm rồi chung kết phòng — xem *Thể thức thi*
