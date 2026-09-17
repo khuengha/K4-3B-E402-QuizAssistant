@@ -8,7 +8,7 @@ Canvas nộp ở CP1 theo scaffold `02-guide.md` §1.5 — mỗi dòng một ý,
 | 1 | Track + đề |C1 · Knowledge-to-Lesson — Graph tri thức và bài học thích ứng
 | 2 | Job executor (ai · đang ở đâu · làm gì) |Giảng viên đang chuẩn bị quiz ôn tập cho một bài học từ các documents trước và sau buổi giảng. |
 | 3 | Pain một câu (ai – đang làm gì – vướng đâu – hậu quả) | |
-| 4 | 1–2 bằng chứng đầu (số + cách đếm + mã hội thoại/tin nhắn, hoặc khảo sát/phỏng vấn có số người) | |
+| 4 | 1–2 bằng chứng đầu (số + cách đếm + mã hội thoại/tin nhắn, hoặc khảo sát/phỏng vấn có số người) | **Phỏng vấn 5 người: 3/5 (P02, P03, P04) từng dùng AI tạo quiz; P02 lo về chất lượng đầu ra và độ phân hóa câu hỏi, P03 ghi nhận quiz có thể không bao phủ bài giảng, đáp án dài/ngắn không đồng đều và tốn công review, P04 chưa từng tạo quiz trước đây, nhưng vẫn đang có nhu cầu thử công cụ nếu việc tạo quiz được hỗ trợ tốt, P05 có khó khăn khi tạo quiz, đặc biệt là đảm bảo chất lượng câu hỏi vì câu hỏi dễ bị hallucinate .** |
 | 5 | Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả) | |
 | 6 | AI tự làm đến đâu + 1 dòng lý do · ≥3 willing users ngoài nhóm | |
 | 7 | Phân công có tên | |
