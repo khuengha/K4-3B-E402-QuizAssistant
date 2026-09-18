@@ -407,7 +407,7 @@ def quiz(payload: dict):
 
     def _gen_batch(batch):
         payload_llm = [{"concept": n["name"], "definition": n["definition"],
-                        "quote": n["quotes"][0], "sources": n["sources"][:2]}
+                        "quote": n["quotes"][0], "sources": [n["sources"][0]]}
                        for n in batch]
         last_err = None
         for attempt in range(3):
@@ -430,27 +430,28 @@ def quiz(payload: dict):
             node = by_name.get(q.get("concept", "").lower())
             if not node:
                 continue  # concept ngoài batch -> loại (chống ảo giác)
-            # provenance: slide -> page; transcript -> turn
-            page, code, title, text = None, None, node["name"], node["quotes"][0]
-            for s in node["sources"]:
-                c = chunks.get((s.get("page"), s.get("turn")))
-                if s.get("page") is not None:
-                    page = s["page"]
-                    if c:
-                        title = c["text"].split("\n")[0][:80]
-                        text = c["text"]
-                elif s.get("turn"):
-                    code = s["turn"]
-                    if c and page is None:
-                        title = c.get("section") or node["name"]
-                        text = c["text"]
+            # provenance ghép đôi: nguồn của CHÍNH quote dùng sinh câu
+            ev = {"quote": node["quotes"][0], "source": node["sources"][0]}
+            page, code, title, text = None, None, node["name"], ev["quote"]
+            s = ev["source"]
+            c = chunks.get((s.get("page"), s.get("turn")))
+            if s.get("page") is not None:
+                page = s["page"]
+                if c:
+                    title = c["text"].split("\n")[0][:80]
+                    text = c["text"]
+            elif s.get("turn"):
+                code = s["turn"]
+                if c:
+                    title = c.get("section") or node["name"]
+                    text = c["text"]
             questions.append({
                 "topic": node["name"],
                 "level": level if level != "Kết hợp" else q.get("level", "Trung bình"),
                 "q": q.get("q"), "a": q.get("a"), "correct": q.get("correct"),
                 "page": page, "page_total": 24, "code": code or "—",
                 "title": title, "text": text, "explain": q.get("explain", ""),
-                "quote": node["quotes"][0],
+                "quote": ev["quote"],
                 "concept_id": node["id"],
             })
         trace_log("llm_quiz", batch=batch_idx, n_concepts=len(batch),
@@ -464,7 +465,7 @@ def quiz(payload: dict):
         rest = [n for n in pool if n["id"] not in used_ids][: count - len(questions)]
         if rest:
             payload_llm = [{"concept": n["name"], "definition": n["definition"],
-                            "quote": n["quotes"][0], "sources": n["sources"][:2]} for n in rest]
+                            "quote": n["quotes"][0], "sources": [n["sources"][0]]} for n in rest]
             try:
                 raw = call_llm(QUIZ_SYSTEM, json.dumps({"level": level, "concepts": payload_llm}, ensure_ascii=False))
                 extra = parse_json(raw).get("questions", [])

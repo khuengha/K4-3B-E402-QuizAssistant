@@ -141,12 +141,25 @@ def build_graph_for_file(path: Path, force: bool = False,
                        f"NGUỒN: file {path.name}, "
                        f"{'trang ' + str(chunk['page']) if chunk['source_type'] == 'slide' else 'lượt nói ' + chunk['turn']}\n"
                        f"ĐOẠN TÀI LIỆU:\n{chunk['text'][:4000]}")
-        parsed = parse_json(raw)
+
+        def _norm_ws(s: str) -> str:
+            return re.sub(r"\s+", " ", s.replace("“", '"').replace("”", '"')).strip()
+
+        # kiểm chứng provenance NGAY KHI trích: quote phải nguyên văn trong chunk
+        n_src = _norm_ws(chunk["text"])
+        verified, dropped = [], 0
+        for c in parse_json(raw).get("concepts", []):
+            q = _norm_ws(c.get("quote", ""))
+            if q and q in n_src:
+                verified.append(c)
+            else:
+                dropped += 1  # quote không truy được về chunk -> bỏ (nguyên tắc provenance)
         rec = {"chunk_id": chunk["chunk_id"], "provenance": prov,
-               "concepts": parsed.get("concepts", []),
-               "edges": parsed.get("edges", [])}
+               "concepts": verified,
+               "edges": parse_json(raw).get("edges", []),
+               "n_quote_dropped": dropped}
         trace_log("llm_extract", chunk=chunk["chunk_id"],
-                  n_concepts=len(rec["concepts"]))
+                  n_concepts=len(verified), n_quote_dropped=dropped)
         with lock:
             records.append(rec)
             done_count[0] += 1
@@ -195,13 +208,15 @@ def _merge_records(records: list) -> dict:
         prov = r["provenance"]
         for c in r["concepts"]:
             k = _norm_key(c["name"])
+            # evidence ghép ĐÔI: quote nào đi với nguồn đó — không bao giờ lệch nhau
+            ev = {"quote": c.get("quote", ""), "source": prov}
             if k in key_to_id:
                 n = nodes[key_to_id[k]]
                 if (c.get("confidence") or 0) > n["confidence"]:
                     n["definition"] = c.get("definition", n["definition"])
                 n["confidence"] = max(n["confidence"], c.get("confidence") or 0)
                 if c.get("quote"):
-                    n["quotes"].append(c["quote"])
+                    n["evidence"].append(ev)
                 n["sources"].append(prov)
                 continue
             cid = f"c{len(nodes) + 1:04d}"
@@ -210,6 +225,7 @@ def _merge_records(records: list) -> dict:
                           "type": c.get("type", "concept"),
                           "definition": c.get("definition", ""),
                           "quotes": [c.get("quote", "")] if c.get("quote") else [],
+                          "evidence": [ev] if c.get("quote") else [],
                           "sources": [prov],
                           "confidence": c.get("confidence") or 0}
             key_to_id[k] = cid
