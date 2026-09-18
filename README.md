@@ -1,3 +1,7 @@
+## Chạy ứng dụng Knowledge-to-Lesson
+
+Chạy `python server.py`, mở `http://localhost:8000`. Xem [hướng dẫn Live Quiz](LIVE_QUIZ.md) để tạo phòng và cho người học tham gia cùng mạng.
+
 # Mini Hackathon AI — Batch 04 · Lớp 3A
 
 **SPEC → Prototype → Demo.** Đây không phải cuộc thi code — đây là cuộc thi **tư duy sản phẩm AI**.
