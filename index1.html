@@ -2405,7 +2405,7 @@
         }
         async function api(path, options = {}) {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 90000);
+            const timeout = setTimeout(() => controller.abort(), 150000);
             try {
                 const response = await fetch(path, {...options, signal: controller.signal});
                 const data = await response.json();
@@ -2436,22 +2436,27 @@
             try {
                 const data = await post('/api/quiz', {graph_id: graph, count: requested, level: difficulty, topics,
                     seed: Math.floor(Math.random() * 1000000),
-                    exclude_concept_ids: refill ? questions.map(q => q.concept_id).filter(Boolean) : []});
-                if (!Array.isArray(data.questions) || !data.questions.length) throw new Error('Chưa nhận được câu hỏi hợp lệ.');
+                    existing_questions: refill ? questions.map(q => ({concept_id: q.concept_id, q: q.q,
+                        a: q.a, correct: q.correct, status: q.status, original_q: q.bankKey || q.q})) : []});
+                if (!Array.isArray(data.questions)) throw new Error('Phản hồi API không hợp lệ.');
+                if (!data.questions.length) {
+                    showPath('low', 'Chưa tạo được câu hỏi mới', (data.message || 'Chưa đủ nội dung phù hợp.') + ' Bộ hiện tại được giữ nguyên.');
+                    return;
+                }
                 if (refill) {
                     const used = new Set(questions.map(q => q.bankKey || q.q));
                     const fresh = data.questions.filter(q => !used.has(q.q)).slice(0, requested);
                     fresh.forEach(q => questions.push({...q, id: questions.length, status: 'pending', selected: null, bankKey: q.q}));
                     tab = 'pending';
                     showPath(fresh.length < requested ? 'low' : 'success', 'Đã bù ' + fresh.length + '/' + requested + ' câu',
-                        'Giữ nguyên câu đã duyệt. Câu bổ sung cần được duyệt trước khi xuất hoặc chơi.');
+                        (data.message || '') + ' Giữ nguyên câu đã duyệt. Câu bổ sung cần được duyệt trước khi xuất hoặc chơi.');
                 } else {
                     questions = data.questions.map((q, id) => ({...q, id, status: 'pending', selected: null, bankKey: q.q}));
                     targetCount = requested; generationLevel = difficulty; generationTopics = new Set(topics);
                     generationGraphId = graph; generatedTopicCount = topics.length; tab = 'all';
                     $('#result-description').textContent = 'Vừa tạo · ' + questions.length + ' câu · ' + difficulty;
                     showPath(questions.length < requested ? 'low' : 'success', 'Đã tạo ' + questions.length + '/' + requested + ' câu',
-                        'Câu hỏi có đáp án và bằng chứng từ tài liệu. Hãy kiểm tra, sửa hoặc loại trước khi duyệt.');
+                        (data.message || '') + ' Câu hỏi có đáp án và bằng chứng từ tài liệu. Hãy kiểm tra, sửa hoặc loại trước khi duyệt.');
                 }
                 document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
             } catch (error) {

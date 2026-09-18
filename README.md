@@ -23,6 +23,20 @@ Không chạy bằng server tĩnh hoặc mở HTML trực tiếp: UI cần API t
 4. Xem nguồn, sửa/loại/duyệt; sửa câu hỏi sẽ yêu cầu duyệt lại. Bù câu dùng nguồn và cấu hình của bộ quiz ban đầu.
 5. Xuất câu đã duyệt hoặc bấm **Play Quiz** để mở phòng. Xem [hướng dẫn Live Quiz](LIVE_QUIZ.md).
 
+Số nguồn không phải giới hạn số câu: một concept có thể sinh nhiều câu khác nhau.
+Hệ thống phủ đều chủ đề, ưu tiên câu dư cho chủ đề có nhiều bằng chứng khác nhau;
+ví dụ 3 chủ đề và 4 câu được phân bổ 2–1–1. Bù câu cân bằng với các câu còn giữ,
+tránh lặp cả câu bị loại và không thay đổi câu đã duyệt. Nếu chưa đủ, BE thử bổ sung
+một lần; thiếu nội dung hợp lệ sẽ trả số câu thực tế và cảnh báo vàng, không bịa thêm.
+Chống trùng dùng prompt và so sánh văn bản chuẩn hóa; chưa bảo đảm phát hiện mọi câu trùng nghĩa.
+
+API `POST /api/quiz` nhận thêm `existing_questions` (concept_id, q, a, correct, status;
+`original_q` tùy chọn để tránh lặp câu trước khi sửa). `count` là số câu mới cần sinh.
+Response giữ `questions`, `graph_id`, `n_pool`, `skipped` và thêm `requested_count`,
+`generated_count`, `status` (`complete`, `partial`, `insufficient_evidence`), `message`.
+Thiếu câu trả HTTP 200 để UI giữ kết quả hợp lệ; lỗi dịch vụ AI trả 502.
+`exclude_concept_ids` vẫn được hỗ trợ cho client cũ, nhưng UI bù câu không dùng trường này.
+
 Tài liệu, graph và cache lưu ở `appdata/`. Upload cùng nội dung dùng lại cache;
 xóa tài liệu làm graph ghép liên quan hết hiệu lực. Phòng Live Quiz lưu trong RAM,
 mất khi restart/reload server. Quiz đang soạn chưa được lưu khi tải lại trang.

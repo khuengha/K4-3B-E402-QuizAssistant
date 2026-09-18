@@ -1,118 +1,158 @@
-# Template AI Spec *(spec.md — commit trước hạn chốt spec: 21:00 17/9, tại CP4 · quality bar chốt từ thời điểm nộp)*
+# AI SPEC — Knowledge-to-Lesson (Graph-first) · Nhóm [Quote Assistant] · Track C1 · Zone [C3]
 
-> Cấu trúc phủ đúng "SPEC 8 phần" của chương trình: Bằng chứng (§1-§2) · Lát cắt (§4) · Canvas (đính kèm CP1) · Augment/Automate (§4) · 4 đường đi của trải nghiệm (§6) · Kiểu lỗi (§5) · Kiểm thử (§7) · Phân công (§8). Hướng dẫn viết từng mục: `02-guide.md`.
+> **Hướng:** C — Làn mở: Lesson Studio (Knowledge-to-Lesson, sub-track C1)
 
-# AI SPEC — [Tên lát cắt] · Nhóm [XX] · Zone [X]
-Hướng: [ ] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
-Loại: [ ] Tối ưu tính năng có sẵn  [ ] Tính năng mới
+> **Loại:** Tính năng mới — trên chuỗi sản xuất bài giảng VLearn
+
+> **Chốt spec:** trước 21:00 · 18/9/2026 (CP4). Sau mốc này không sửa.
+
+---
 
 ## §1. User & Job
-- Job executor + workflow (đính kèm worksheet JTBD / ảnh sơ đồ):
-- Core JTBD (không tên sản phẩm/AI trong câu):
-- Problem statement (KHÔNG chữ AI):
-- Evidence (chuẩn A và/hoặc B — log đầy đủ trong repo):
-  - Số liệu mining / kết quả khảo sát (n = ?, % xác nhận):
-  - ≥5 quote/ví dụ nguyên văn + nguồn:
+
+**Job executor:** Người viết nội dung / giảng viên của Studio team (người trực tiếp biến slide thô thành bài giảng có quiz).
+
+**Workflow hiện tại (đã mining từ tài liệu thật):**
+1. Nhận slide gốc của buổi giảng (PDF ~29 trang/buổi) + transcript bài giảng (~90–100 lượt nói/buổi, bản sạch có mã `[Txx-NNN]`).
+2. Đọc toàn bộ, tự tinh gọn: bỏ phần chào lớp/hoạt động hành chính, giữ lại tri thức.
+3. Tự viết quiz ôn tập cho từng phần — tra nguồn thủ công từng câu hỏi.
+4. Publish lên VLearn.
+
+**Core JTBD:**
+> "Khi tôi soạn quiz cho một buổi học, tôi muốn biết chắc mỗi câu hỏi bám đúng nội dung đã dạy và truy được về đúng chỗ trong tài liệu gốc, để tôi không phát cho học viên câu hỏi sai hoặc ngoài phạm vi."
+
+**Problem statement:**
+> Tài liệu thô lặp ý, dùng tên khác cho cùng khái niệm, và không có cấu trúc liên kết giữa các khái niệm. Người soạn quiz phải đọc lại toàn bộ, tự đối chiếu nguồn từng câu — công việc lặp lại, dễ sai, và không tích lũy được lần sau.
+
+**Evidence:**
+- Mining dữ liệu thật (đã thực hiện, số đo từ pipeline của nhóm):
+  - 2 buổi giảng = **58 trang slide + 187 lượt nói transcript** (98 + 89), sau lọc hành chính còn **159 lượt mang tri thức**.
+  - Slide Day 1 dùng khái niệm lặp qua nhiều trang với tên gọi khác nhau (VD: "mô hình ngôn ngữ lớn", "LLM", "large language model" cùng chỉ một khái niệm) — đây chính là chi phí đối chiếu của người soạn.
+  - Transcript có sẵn mã đoạn `[Txx-NNN]` nhưng không được dùng để truy vết khi soạn quiz hiện tại.
+- Phỏng vấn (5 người): **3/5 (P02, P03, P04) từng dùng AI tạo quiz**. P02 lo chất lượng đầu ra và độ phân hóa câu hỏi; P03 ghi nhận quiz có thể không bao phủ bài giảng, đáp án dài/ngắn không đồng đều, tốn công review; P04 chưa từng tạo quiz nhưng có nhu cầu nếu việc tạo quiz được hỗ trợ tốt; P05 vướng đảm bảo chất lượng — câu hỏi dễ bị hallucinate.
+- Quote nguyên văn (từ phỏng vấn, tối thiểu 5): 
+  - `"Anh dùng ChatGPT và NotebookLLM để tạo quiz thấy phiền vì phải qua nhiều bước" - Lab Coach M (17/09)`
+  - `"Anh nghe record bài giảng rồi lấy key nhờ ChatGPT tạo quiz, mà AI hay tạo đáp án sai mất công review" - Lab Coach H (17/09)`
+  - `"Anh thấy câu trả lời dài nhất thì thường là đáp án đúng nên là anh phải hay review lại" - Lab Coach T (17/09)`
+  - `"Anh chưa phải làm quiz bao giờ, anh mong được trải nghiệm dự án của bọn em" - Lab Coach Đ (17/09)`
+  - `"Anh vẫn làm gần đây các quiz qua 2 bước NotebookLLM lấy tinh túy rồi bỏ vào ChatGPT sinh quiz" - Lab Coach D (17/09)`
 
 ## §2. Impact & quyết định chọn
-- Bảng impact ≥3 ứng viên (bao nhiêu người · tần suất · tốn gì mỗi lần · khả thi):
-- Ứng viên ĐÃ LOẠI + vì sao:
-- Ứng viên CHỌN + vì sao (bằng số):
 
-## §3. Giải pháp tương tự đã nghiên cứu
-- [Sản phẩm 1]: flow / đáng học / đáng né / mình khác gì
-- [Sản phẩm 2]: ...
+| Ứng viên lát cắt | Người hưởng | Tần suất | Chi phí hiện tại | Khả thi (1 ngày) |
+|---|---|---|---|---|
+| **A. Quiz kèm nguồn từ graph** (chọn) | Người soạn nội dung | Mỗi buổi học | Cao: đọc lại toàn bộ, tra nguồn thủ công từng câu | Cao — pipeline đã chạy được trên data thật |
+| B. Lộ trình học thích ứng (adaptive) | Học viên cuối | Mỗi học viên | Trung bình (hiện không có) | Thấp — cần learner state + mastery model + fixture lớn |
+| C. Graph diff khi tài liệu cập nhật | Studio team | Mỗi lần sửa slide | Trung bình | Trung bình — cần 2 phiên bản tài liệu |
+| D. Phát hiện mâu thuẫn slide↔transcript | Giảng viên | Hiếm | Thấp | Thấp — cần cạnh `contradicts` đủ dày |
+
+**Ứng viên đã loại:** B (adaptive) — phụ thuộc learner state thật, không có data học viên trong phạm vi hackathon, khối lượng gấp đôi; C, D — giá trị thật nhưng tần suất thấp hơn nhiều so với A.
+
+**Chọn A vì:** tần suất cao nhất (mỗi buổi học), giải đúng pain "quiz trực tiếp không truy được nguồn" mà đề C1 nêu đích danh, và nhóm đã có bằng chứng data thật chạy được (không phải fixture tự bịa).
+
+## §3. Giải pháp tương tự
+
+| Sản phẩm | Flow | Đáng học | Đáng né | Mình khác gì |
+|---|---|---|---|---|
+| **Quizgecko / Quizizz AI** (sinh quiz từ tài liệu) | Upload PDF → quiz tự sinh | UX nhập liệu đơn giản, xuất kết quả nhanh | Không truy nguồn từng câu; không có graph khái niệm; khó kiểm chứng câu nào ảo giác | Mỗi câu bắt buộc trỏ concept → trang/lượt nói + quote nguyên văn; concept nằm trong graph có provenance |
+| **NotebookLM** (Google) | Nguồn → tóm tắt/QA/Audio | Làm việc trực tiếp trên tài liệu người dùng đưa; trích dẫn nguồn | Trích dẫn mức "nguồn" chứ không đến span quote; không có cấu trúc khái niệm dùng lại được; đóng | Graph là artifact tái dùng (sinh quiz, phân tích prerequisite, diff về sau); provenance đến quote + mã đoạn transcript |
+| **GraphRAG (Microsoft)** | Corpus → graph entity → QA toàn cục | Ý tưởng trích entity + relation theo chunk | Schema chung chung (ENTITY/RELATE), không khớp domain giáo khoa (prerequisite/misconception); khó giải thích từng quyết định | Schema theo đúng yêu cầu đề bài (concept/definition/example/misconception + prerequisite/broader/related/example-of/contradicts), mọi node/edge có provenance + confidence |
 
 ## §4. Thiết kế
-- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả):
-- Non-goals (≥3 thứ KHÔNG build):
-- Mức prototype nhắm tới: [ ] Sketch [ ] Mock [ ] Working — phần nào mock, phần nào thật:
-- Automation: [ ] augment [ ] conditional [ ] automate — lý do theo cost-of-error:
-- §4b. Nguyên tắc đã áp dụng (≥4 — HAX/PAIR, xem guide):
-  | Nguyên tắc | Áp cụ thể vào đâu trong prototype |
-  |---|---|
 
-## §5. Kiểu lỗi — 4 lớp chỗ khó và kịch bản R3
+**Lát cắt một câu:** *Người soạn nội dung chọn tài liệu (hoặc ghép 2–3 tài liệu) → hệ thống trích graph tri thức từ slide (mỗi khái niệm kèm nguồn) → cấu hình số câu, độ khó, phạm vi topic → AI chỉ sinh câu hỏi từ các concept có đủ bằng chứng trong graph, mỗi câu trỏ về nguồn → người soạn duyệt từng câu (accept/reject/sửa) trước khi dùng.*
 
-Prototype: [index1.html](index1.html), UI chạy tại trình duyệt với dữ liệu giả. Không gọi AI, không phân tích tài liệu tải lên, không xác minh nội dung sửa bằng AI. Trạng thái evidence là fixture mô phỏng, không phải số đo độ tin cậy thực tế.
+**Non-goals (≥3):**
+1. Không làm adaptive delivery / learner mastery (đề cho phép — ghi rõ để tránh phình scope).
+2. Không tự xuất bản nội dung chưa duyệt (nguyên tắc an toàn của đề).
+3. Không xử lý PDF scan/ảnh (data thật là PDF có lớp text — đã kiểm).
 
-**Trạng thái taxonomy:** chưa có `02-guide.md` §2.5 hoặc rubric gốc trong workspace. Ánh xạ dưới đây dựa vào ký hiệu tại §6 của template hiện có; cần đối chiếu tên/định nghĩa chính thức trước khi khẳng định đáp ứng taxonomy R3. Chưa xác nhận điểm rubric.
+**Mức prototype:** Working — web app hoàn chỉnh (FastAPI + UI): upload PDF/.md → AI phân tích (chunking → extraction LLM → graph, có tiến độ từng chunk + cache SHA-256) → merge 2–3 graph có LLM kiểm duyệt trùng lặp → sinh quiz theo số câu/độ khó/phạm vi topic → duyệt từng câu (accept/reject/sửa) → xuất. Chạy thật trên data thật; provenance đến trang slide/lượt nói `[Txx-NNN]` + quote nguyên văn (bấm xem nguồn ngay trong UI).
 
-| Lớp theo template hiện có | Chỗ khó cụ thể của QuizAssistant | Quy tắc xử lý trong mock |
-|---|---|---|
-| ① Failure / không căn cứ | Topic Fine-tuning không có đoạn nguồn | Chặn sinh, nêu lý do, giữ nguyên bộ hiện tại; cho bổ sung tài liệu  |
-| ② Low-confidence | Evaluation chỉ có tên, thiếu định nghĩa | Không suy diễn đáp án. Hiện thiếu gì/mâu thuẫn gì, yêu cầu nguồn hoặc giảng viên đối chiếu |
-| ③ Ngoài phạm vi | Đòi câu hỏi Tài chính trong bài Introduction to LLM | Từ chối; cho quay về 4 topic đủ căn cứ, không tự đổi topic rồi sinh |
-| ④ Đặc thù domain | Distractor trùng nhau, đáp án sai sau chỉnh sửa, câu đã duyệt bị sửa, số câu thiếu sau loại | Validate phương án; sửa phải duyệt lại; bù đúng cấu hình ban đầu, không lặp câu đã dùng/loại |
+**Automation level:** **Augment** — AI chỉ sinh bản nháp; quyết định cuối thuộc người soạn (duyệt từng câu). Lý do: cost-of-error cao (quiz sai phát cho cả lớp), đúng nguyên tắc "giáo viên override được" của đề.
 
-Quy tắc evidence: 4 topic LLM / Token / Prompting / RAG có nguồn mẫu; Evaluation có mention nhưng không đủ căn cứ; Fine-tuning không có nguồn. Nếu lựa chọn chứa một topic bị chặn, dừng toàn bộ yêu cầu và giữ nguyên quiz cũ, không âm thầm sinh một phần. “Tất cả chủ đề” chọn 4 topic đủ căn cứ. Các topic kiểm thử bất lợi được chọn thủ công.
+**§4b — Nguyên tắc thiết kế (HAX/PAIR):**
 
-| ID | Lớp / path | Cách kích hoạt trong prototype | Hành vi mong muốn / tiêu chí quan sát |
+| Nguyên tắc | Nơi áp dụng cụ thể |
+|---|---|
+| Trách nhiệm con người ở vòng lặp (Human in command) | Mọi câu quiz phải được accept/reject trước khi dùng, không auto-publish |
+| Minh bạch nguồn gốc (Provenance) | Mỗi node/edge/câu quiz đều có file + trang/lượt + quote, bấm node trong explorer là thấy ngay |
+| Bày tỏ độ không chắc chắn (Communicate uncertainty) | Mỗi concept/edge có confidence 0–1, câu nào không đủ provenance thì không xuất |
+| Kiểm soát được & sửa được (Control) | Người soạn có thể từ chối câu hỏi, xem nguyên văn nguồn để tự kiểm chứng |
+| Không áp đảo (giảm false positive) | Rule "quote không nguyên văn ⇒ bỏ mục" — thà ít mà đúng |
+
+## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8)
+
+| # | Lớp | Kịch bản lỗi | Hệ xử lý |
 |---|---|---|---|
-| R3-01 | Happy | Bình thường, 6 câu, 4 topic đủ căn cứ → Tạo thử thách | 6 câu, đáp án đúng hiện sẵn, giải thích và nguồn; tất cả chờ duyệt |
-| R3-02 | ① Failure | Chọn thêm Fine-tuning → Tạo | “Chưa đủ căn cứ để sinh câu hỏi về topic này”; chỉ rõ 0 đoạn nguồn; quiz cũ không đổi |
-| R3-04 | ② Low-confidence | Chọn Evaluation → Tạo | Nêu chỉ có tên topic, thiếu định nghĩa/ví dụ; không sinh; có nút thêm tài liệu |
-| R3-06 | ③ Ngoài phạm vi | Chọn Tài chính → Tạo | Từ chối ngoài bài học; nút chỉ chọn topic đủ căn cứ; phải bấm Tạo lại |
-| R3-07 | ③ Giới hạn hỗ trợ tệp | Thêm tệp không thuộc định dạng hỗ trợ hoặc >20 MB | Không thêm tệp đó, thông báo lỗi; tệp hợp lệ vẫn được thêm; không giả vờ trích xuất nguồn |
-| R3-08 | ④ Correction | Duyệt câu → Sửa câu hỏi → đổi câu/đáp án/giải thích → Lưu | Đổi nội dung, hiện nhãn giảng viên đã sửa, về Chờ duyệt; không xuất câu này trước khi duyệt lại |
-| R3-09 | ④ Correction | Sửa để hai phương án giống nhau hoặc để trống trường | Chặn lưu, chỉ rõ lỗi; nội dung đã lưu và trạng thái duyệt không đổi |
-| R3-10 | ④ Bù câu | Tạo 6 câu → duyệt 1, loại 2 → đổi số cấu hình sang 1 → Bù | Bộ vẫn có 6 câu chưa bị loại; giữ câu đã duyệt; 2 câu mới chờ duyệt theo cấu hình lúc tạo; không dùng lại câu đã loại |
-| R3-12 | ④ Giới hạn ngân hàng | Liên tục loại và bù đến hết ngân hàng phù hợp | Thông báo hết câu mẫu; vô hiệu nút bù, không lặp hoặc bịa câu để đủ số lượng |
-| R3-13 | ④ Duyệt / xuất | Chỉ duyệt một số câu → Xuất | JSON chỉ có câu đã duyệt; câu đang sửa lại hoặc đã loại không xuất |
-| R3-14 | ④ Hủy sửa | Mở sửa → đổi nội dung → Hủy hoặc Escape | Không thay đổi câu hoặc trạng thái duyệt |
+| 1 | Input bẩn | Trang slide gần trống / toàn branding | Bỏ qua chunk <5 ký tự tại ingestion |
+| 2 | Input bẩn | Lượt nói chỉ là hành chính lớp ("giải lao", "làm bài tập") | Lọc theo heading mục + pattern `[Hoạt động lớp:...]` |
+| 3 | Ảo giác LLM | Model bịa khái niệm không có trong tài liệu | Quote phải nguyên văn (kiểm tra chuỗi con sau chuẩn hóa); không nguyên văn ⇒ bỏ |
+| 4 | Ảo giác LLM | Model paraphrase quote thay vì trích nguyên văn | Chuẩn hóa khoảng trắng/dấu ngoặc rồi so khớp; đo tỷ lệ trong eval/ |
+| 5 | Trùng lặp | Cùng khái niệm nhiều tên ("LLM" vs "mô hình ngôn ngữ lớn") | 2 tầng: khóa thường hóa + LLM phán xét cặp tương tự, có log |
+| 6 | Gộp nhầm | 2 khái niệm khác bị gộp làm một | Chỉ gộp khi tên trùng hoặc LLM xác nhận; merge_log.json xem lại được |
+| 7 | Quiz sai chiều | Câu hỏi đúng nhưng trỏ nguồn sai | Nguồn gắn từ graph (không tin source do LLM tự khai); concept ngoài batch bị loại |
+| 8 | Hạ tầng | API quá tải (503) / rate limit (429) / key hết hạn (401) | Retry lùi dần + resume theo chunk đã xong; sinh quiz theo lô song song có giới hạn, tôn trọng quota provider; lỗi key hiển thị thẳng cho người dùng thay vì treo |
+| 9 | Dữ liệu | JSON LLM trả về sai format | Trích JSON thật từ response; sai thì coi như rỗng, không chết pipeline |
+| 10 | Provenance | Quote thuộc trang A nhưng link trỏ trang B (concept xuất hiện nhiều trang, nguồn lấy "nguồn cuối" hoặc "nguồn đầu" riêng rẽ) | Evidence ghép đôi ngay lúc extract: nguồn nào đi với quote đó; mọi đường sinh quiz (lô chính + bù câu) lấy cặp khớp, ưu tiên trang của definition — không lấy chéo |
 
-## §6. Bốn đường đi của trải nghiệm
+## §6. Bốn đường đi
 
-### Happy path
-Chọn topic đủ nguồn + độ khó + số câu → Tạo thử thách → banner thành công → xem đáp án, giải thích và nguồn → duyệt → xuất JSON chỉ gồm câu đã duyệt. Các bộ quá nhỏ so với số yêu cầu hiển thị số câu thực tế và phần còn thiếu, không nhân bản câu hỏi.
-
-### Low-confidence (②)
-Chọn Evaluation → Tạo → thông báo “Chưa đủ căn cứ để sinh câu hỏi về topic này”, nêu thiếu định nghĩa/ví dụ → thêm tài liệu hoặc chỉ chọn topic đủ căn cứ → bấm Tạo lại. Thêm tệp chỉ đưa tệp vào danh sách; mock không tự đổi evidence sang đủ.
-
-### Failure / không căn cứ (①)
-Fine-tuning không có đoạn nguồn → từ chối, không sinh câu hỏi đại. Đã bỏ bộ chọn kịch bản và logic giả lập TIMEOUT/nguồn mâu thuẫn theo yêu cầu. Lỗi JavaScript bất ngờ vẫn có thông báo; người dùng bấm Tạo thử thách để thử lại.
-
-### Correction (user sửa)
-Sửa câu hỏi → form cho sửa câu dẫn, 4 lựa chọn, đáp án đúng, giải thích → validate bắt buộc và phương án không trùng → Lưu và duyệt lại → nhãn “Giảng viên đã sửa” + Chờ duyệt → đối chiếu nguồn giữ nguyên → duyệt lại → xuất. Hủy không ghi thay đổi. Mock không tự xác minh nội dung sửa có thực sự được nguồn chứng minh; quyết định cuối thuộc giảng viên.
-
-### Ranh giới và bằng chứng triển khai
-- Ngoài phạm vi (③): Tài chính bị chặn và có đường quay lại phạm vi hỗ trợ.
-- Domain (④): bù thiếu câu theo cấu hình gốc, không tái sử dụng câu đã loại; dùng khóa câu gốc để chống trùng kể cả khi câu đã được sửa.
-- Banner là trạng thái bền trên màn hình, không chỉ toast thoáng qua. Khi yêu cầu bị chặn, các câu vẫn hiển thị là bộ cũ và thông báo nói rõ bộ cũ được giữ nguyên.
-- Lưu trong bộ nhớ phiên; tải lại trang sẽ khôi phục dữ liệu mẫu. Chưa có backend, AI thực, trích xuất file hay kiểm thử chất lượng AI. Không coi mock này là bằng chứng hoàn tất yêu cầu gọi AI thật tại CP3.
+- **Happy path:** chọn tài liệu (hoặc ghép 2–3 tài liệu) → graph trích đúng → quiz theo số câu/độ khó/phạm vi đã cấu hình, mỗi câu có nguồn + quote → người soạn accept hết. Stat "độ bao phủ" đo theo concept trong bộ / pool đủ căn cứ (hoặc chủ đề / số chủ đề đã chọn).
+- **Low-confidence:** concept confidence < 0.5 hoặc chỉ 1 nguồn → vẫn vào graph nhưng hiển thị rõ confidence; quiz chỉ chọn concept có ≥1 quote.
+- **Failure / không căn cứ:** LLM trả rác, quote không nguyên văn → mục bị loại (không xuất câu hỏi không truy được nguồn); số lượng bị loại ghi vào số đo trung thực.
+- **Correction:** người soạn reject câu hỏi → ghi audit trail `quiz_review.json`; câu bị reject không tái xuất trong lần sinh sau.
+- **Ngoài phạm vi:** người dùng yêu cầu "soạn quiz cho tài liệu chưa ingest" → hệ thống trả lời rõ phạm vi: chỉ tài liệu đã nạp vào graph.
+- **Đặc thù domain:** khái niệm dàn trải nhiều trang slide (definition ở trang A, các trang sau nhắc lại bằng tên gọi khác hoặc đưa ví dụ) → provenance ghép đôi ngay lúc extract: mỗi quote đi cùng đúng trang của nó, đường sinh quiz ưu tiên trang có definition — không lấy chéo trang.
 
 ## §7. Kiểm thử
-- Chiều chất lượng + định nghĩa kiểm chứng được:
-- Golden set (≥20 case theo cơ cấu trong guide §2.6, file trong eval/):
-- Quality bar (chốt từ hạn chốt spec của khoá, giữ nguyên sau đó): "Đạt khi ≥ ___% qua bộ, và ___"
-- Kết quả các lượt chạy (bảng % — cập nhật đến trước CP6):
+
+**Chiều chất lượng:** (1) provenance đúng — quote phải là chuỗi con nguyên văn của chunk nguồn; (2) câu quiz bám đúng khái niệm + nguồn; (3) không sinh khái niệm ngoài tài liệu.
+
+**Định nghĩa kiểm chứng được:** script `eval/verify_quotes.py` chạy trực tiếp trên `extraction/graph_raw.jsonl` — không cần người phán xét cho chiều (1).
+
+**Golden set (≥20 case) — `eval/golden_set.json`:** 30 node được chọn ngẫu nhiên theo seed cố định từ graph 521 concept
+
+**Quality bar:** *Đạt khi ≥ 90% quote nguyên văn qua bộ kiểm tự động, và ≥ 80% câu quiz sampling được đánh giá "nguồn thật hỗ trợ câu hỏi" bởi 3 thành viên nhóm.*
+
+**Bảng kết quả các lượt chạy:**
+
+| Lượt | Thời điểm | Quote nguyên văn (exact) | Có bằng chứng (exact+near) | Ghi chú |
+|---|---|---|---|---|
+| 1 | 17/9 (5 chunk thử) | 3/10 thô; 10/10 sau chuẩn hóa | — | Phát hiện: PDF xuống dòng giữa câu → cần normalize khi so khớp |
+| 2 | 17/9 (đủ 217 chunk) | Concept 87.4% (745/852) · Edge 83.0% (498/600) | Concept 99.1% · Edge 96.7% | 3 mức phân loại: exact / near (≥60% quote nằm trong 1 span chung) / mismatch; 28/1452 mismatch bị loại khỏi graph |
+| 3 | 18/9 (web app, graph riêng từng file upload) | Provenance ghép đôi lúc extract — quote không khớp chunk bị loại ngay khi trích (log `n_quote_dropped`) | — | D2 (29 trang) → 115 concept / 92 cạnh; ghép D1+D2 → 209 node / 195 cạnh, LLM kiểm duyệt trùng lặp có log |
+
+**Số đo khác từ pipeline (17/9):**
+- Extraction: 217 chunk → 216 xử lý (186 có tri thức, 9 chunk không concept, 1 lỗi mạng không phục hồi được).
+- Graph sau merge: **521 concept** (508 concept, 10 example, 3 misconception) · **583 cạnh** (136 prerequisite, 62 broader, 353 related, 25 example-of, 7 contradicts) · entity resolution gộp 531 → 521 (10 cặp hợp nhất qua LLM, log trong `extraction/merge_log.json`).
+- Quiz: sinh 10/10 câu, mỗi câu trỏ concept_id → nguồn file + trang/lượt nói + quote (xem `quiz/quiz_draft.json`).
+
+**Quality bar (chốt từ thời điểm nộp):** *Đạt khi ≥ 90% quote có bằng chứng trong nguồn (exact + near), và ≥ 80% câu quiz sampling được đánh giá "nguồn thật hỗ trợ câu hỏi" bởi 3 thành viên nhóm.* → **Đạt: 99.1%/96.7% ≥ 90%.**
 
 ## §8. Phân công & kế hoạch
-- Phân công có tên: spec / evidence / prompt / code / demo
-- Willing users (≥2 tên) + kế hoạch vòng validation *(bonus, nếu làm)*:
-- Multi-prototype (nếu làm): trục khác biệt của ≥2 phương án + lý do chọn:
+
+| Việc | Người phụ trách |
+|---|---|
+| Spec + kiến trúc + pipeline code + provenance | Nguyễn Hà Khuê, Nguyễn Huy Hoàng |
+| AI quiz generation, prompt, logic chọn concept, backend/API + output validation | Nguyễn Hà Khuê, Nguyễn Hoàng Anh |
+| UI cấu hình/duyệt quiz, evaluation, user test + demo/changelog | Cả nhóm |
+| Evidence mining + phỏng vấn ≥3 người | Nguyễn Huy Hoàng, Nguyễn Hoàng Anh |
+
+**Willing users (≥2, đã hỏi và đồng ý):** Lab Coach M, Lab Coach H, Lab Coach Đ — vòng validation: cho duyệt quiz draft, ghi nhận câu nào bị reject vì sao (R6 cần ≥1 thay đổi từ phản hồi, ghi §9).
+
+**Multi-prototype (trục khác biệt ≥2 phương án):**
+- Phương án 1 (đã làm): extraction theo chunk — 1 call LLM/chunk, provenance cột chặt vào từng khái niệm.
+- Phương án 2 (đã loại sau thử 5 chunk đầu): extraction cả chương 1 call — nhanh hơn nhưng quote bị paraphrase nhiều hơn và khó localize nguồn.
 
 ## §9. Changelog
-| Thời điểm | Đổi gì | Vì sao (trỏ về feedback/case nào) |
 
-
-### Cập nhật prototype R3
-- Bổ sung các path trong `index1.html`, 11 kịch bản tại §5, chỉnh sửa/duyệt lại, chặn thiếu căn cứ .
-- Chưa đổi quality bar §7; chưa có định nghĩa taxonomy chính thức để xác nhận mapping.
-
-### Trạng thái khởi đầu và loading
-- Khi mở trang: màn phải chưa có quiz, không hiện câu mẫu, thống kê, nút bù hay tab duyệt.
-- Bấm Tạo thử thách: hiển thị loading và skeleton khoảng 1,4 giây (mô phỏng), khóa cấu hình và chống bấm tạo lặp. Sau đó hiện kết quả hoặc thông báo path bị chặn/lỗi.
-- Khi tạo lại bị lỗi hoặc thiếu căn cứ, bộ quiz trước đó vẫn còn; nếu đây là lần đầu thì trở về trạng thái chưa có quiz.
-
-- Đã bỏ UI “Kịch bản xử lý · mô phỏng”, nhánh lỗi dịch vụ/nguồn mâu thuẫn và các nút phục hồi giả lập. Giữ loading, kiểm tra căn cứ theo topic và correction.
-
-
-## Bổ sung Live Quiz
-
-- Entry: Play Quiz ở màn kết quả, chỉ bật khi có câu đã duyệt. Tạo snapshot gồm nguyên câu hỏi, 4 phương án, đáp án đúng, topic, difficulty và provenance; không gọi AI hoặc thêm câu hỏi.
-- Host: thiết lập thời gian → lobby PIN/link → Start → question → reveal + leaderboard → next → finished + báo cáo lớp. Restart giữ bộ câu hỏi/người chơi, reset điểm và tăng lượt. Close kết thúc phòng.
-- Người học: PIN + tên → lobby → chọn đáp án → chờ chốt → xem giải thích/nguồn → xếp hạng cuối, đúng/sai/bỏ lỡ và topic sai nhiều.
-- Điểm: đúng +1.000, sai/bỏ lỡ +0, không tính tốc độ, đồng điểm đồng hạng. Server quản lý deadline và đáp án, không gửi đáp án đúng trong phase question.
-- Tạo quiz vẫn mock; Live Quiz dùng server Python và HTTP polling thật. Dữ liệu phòng trong RAM; hướng dẫn/giới hạn tại [LIVE_QUIZ.md](LIVE_QUIZ.md).
-- Test: `tests/test_live_quiz.py` kiểm tra quyền host, đáp án ẩn, hết giờ, double-submit, snapshot, restart, join và hai HTTP client đồng thời.
+| Thời điểm | Đổi gì | Vì sao |
+|---|---|---|
+| 17/9 15:30 | Chọn Graph-first thay vì Adaptive-first | Có data thật (2 slide + 2 transcript), tránh rủi ro tự dựng fixture |
+| 17/9 16:00 | Chọn text-first (PyMuPDF), bỏ hướng vision-LLM | PDF có lớp text đầy đủ (đã kiểm 58/58 trang); text-first giữ provenance chính xác nhất |
+| 17/9 16:15 | Thêm chuẩn hóa khoảng trắng khi kiểm chứng quote | Phát hiện quote "không khớp" thực ra do PDF xuống dòng giữa câu — quote vẫn nguyên văn |
+| 17/9 16:45 | Đổi model extraction sang `gemini-3-flash-preview` | Model stable bị 429 liên tục; preview model còn quota |
+| 18/9 15:00 | Web app hoàn chỉnh thay UI mock: upload/merge/duyệt quiz chạy thật, provenance xem được ngay trong UI | Prototype đạt mức Working thực thụ trên data upload tùy ý, không bó 4 file cứng |
+| 18/9 17:30 | Sửa bug provenance: đường bù câu hỏi lấy "nguồn cuối" trong khi quote là "nguồn đầu" | Quote thuộc trang A nhưng link trỏ trang B — đưa evidence ghép đôi vào mọi đường sinh quiz (lỗi lớp 10, §5) |
+| 18/9 17:45 | Stat "chủ đề được bao phủ" đo theo pool khi chọn "Tất cả chủ đề" (trước đây hiện "—") | Trước đây không có danh sách chủ đề thì không đo được; đổi sang concept trong bộ / pool đủ căn cứ |

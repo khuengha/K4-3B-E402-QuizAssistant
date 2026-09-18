@@ -342,20 +342,19 @@ def _norm_key(s: str) -> str:
 
 # ------------------------------------------------------------------ quiz --
 
-QUIZ_SYSTEM = """Bạn là người ra đề quiz cho bài giảng AI (tiếng Việt), sinh câu hỏi TỪ KNOWLEDGE GRAPH.
-Mỗi concept bạn nhận có: name, definition, quote nguyên văn từ tài liệu, provenance (trang slide / lượt nói).
-QUY TẮC:
-1. Chỉ dùng nội dung trong payload — không thêm tri thức ngoài.
-2. Mỗi câu: 4 phương án, đúng 1; distractor là khái niệm khác trong payload (nhiễu hợp lý).
-3. explanation phải dựa trên quote nguyên văn của concept.
-4. Độ khó do NGƯỜI DÙNG chỉ định trong payload-level. Chỉ dùng đúng level đó cho MỌI câu:
-   "Dễ" = hỏi định nghĩa trực tiếp; "Trung bình" = so sánh/quan hệ giữa khái niệm, tình huống vận dụng nhẹ;
-   "Khó" = case ứng dụng, phân tích, loại trừ nhiễu. KHÔNG tự gán level khác.
-   (Nếu payload-level là "Kết hợp" thì trộn đều 3 mức.)
-5. Không nhắc "theo slide/trang" trong câu hỏi — nguồn chỉ để giảng viên kiểm tra.
-6. SINH ĐỦ MỘT CÂU CHO TỪNG CONCEPT TRONG PAYLOAD — không bỏ sót, không sinh thêm concept khác.
-Xuất JSON: {"questions": [{"concept": "<name đúng như payload>", "q": "...", "a": ["","","",""],
- "correct": 0, "level": "<payload-level>", "explain": "..."}]}"""
+QUIZ_SYSTEM = """Bạn ra đề quiz tiếng Việt CHỈ từ bằng chứng trong payload.
+Payload có concepts (concept_id, definition, evidence gồm evidence_id/quote/source),
+requests (request_id, concept_id, level) và existing_questions cần tránh lặp.
+Sinh một câu cho mỗi request, đúng concept_id và level yêu cầu; mỗi câu 4 phương án
+khác nhau, đúng một đáp án, giải thích dựa vào evidence_id thuộc concept đó.
+Các câu cùng concept phải kiểm tra các ý khác nhau; không chỉ diễn đạt lại cùng câu.
+Tận dụng nhiều bằng chứng khi có. Không lặp existing_questions kể cả câu bị rejected.
+Không thêm kiến thức ngoài tài liệu. Nếu không đủ nội dung cho một request thì bỏ qua,
+không bịa để đủ số. Không nhắc số trang trong câu hỏi.
+Dễ: định nghĩa; Trung bình: quan hệ/vận dụng nhẹ; Khó: phân tích tình huống có căn cứ.
+Chỉ trả JSON: {"questions": [{"request_id": "r1", "concept_id": "c1",
+"evidence_id": "e1", "q": "...", "a": ["...","...","...","..."],
+"correct": 0, "explain": "..."}]}"""
 
 
 def _evidence(node):
@@ -377,21 +376,48 @@ def _valid_question(q):
             and isinstance(q.get("explain"), str) and 0 < len(q["explain"].strip()) <= 2000)
 
 
+def _question_key(text):
+    # Preserve Vietnamese accents while ignoring casing, punctuation and spacing.
+    return " ".join(re.findall(r"\w+", unicodedata.normalize("NFKC", text).casefold()))
+
+
+def _quiz_evidence(node):
+    seen, result = set(), []
+    for ev in _evidence(node):
+        if not isinstance(ev["quote"], str):
+            continue
+        key = _question_key(ev["quote"])
+        if key and key not in seen:
+            seen.add(key)
+            result.append(ev)
+    return result
+
+
 @APP.post("/api/quiz")
 def quiz(payload: dict):
+    import random
     gid, count = payload.get("graph_id"), payload.get("count", 6)
     level, topics = payload.get("level", "Kết hợp"), payload.get("topics", [])
     excluded = payload.get("exclude_concept_ids", [])
+    existing = payload.get("existing_questions", [])
     if (not isinstance(gid, str) or type(count) is not int or not 1 <= count <= 100
             or level not in ("Dễ", "Trung bình", "Khó", "Kết hợp")
             or not isinstance(topics, list) or not all(isinstance(t, str) and t.strip() for t in topics)
             or not isinstance(excluded, list) or not all(isinstance(i, str) for i in excluded)
-            or type(payload.get("seed", 42)) is not int):
+            or type(payload.get("seed", 42)) is not int
+            or not isinstance(existing, list) or len(existing) > 1000):
         raise HTTPException(400, "Cấu hình sinh quiz không hợp lệ")
+    for q in existing:
+        if (not isinstance(q, dict) or not isinstance(q.get("concept_id"), str)
+                or not _valid_question({**q, "explain": "existing"})
+                or q.get("status") not in ("pending", "approved", "rejected")
+                or not isinstance(q.get("original_q", ""), str)
+                or len(q.get("original_q", "")) > 1000):
+            raise HTTPException(400, "Danh sách câu hỏi hiện tại không hợp lệ")
     graph = _get_graph(gid)
-    pool = [n for n in graph["nodes"] if n.get("type") == "concept" and _evidence(n)
+    pool = [n for n in graph["nodes"] if n.get("type") == "concept" and _quiz_evidence(n)
             and n["id"] not in excluded]
-    skipped = [n["name"] for n in graph["nodes"] if n.get("type") == "concept" and not _evidence(n)]
+    skipped = [n["name"] for n in graph["nodes"] if n.get("type") == "concept" and not _quiz_evidence(n)]
     def matches(n, topic):
         wanted = topic.casefold()
         return any(wanted == name.casefold() or
@@ -400,66 +426,100 @@ def quiz(payload: dict):
                    for name in [n["name"], *n.get("aliases", [])])
     if topics:
         pool = [n for n in pool if any(matches(n, t) for t in topics)]
+    def response(questions):
+        status = "complete" if len(questions) == count else "partial" if questions else "insufficient_evidence"
+        message = (f"Đã tạo {len(questions)}/{count} câu hỏi có nguồn."
+                   if questions else f"Đã tạo 0/{count} câu: chưa có câu mới hợp lệ từ bằng chứng trong phạm vi đã chọn.")
+        if status != "complete":
+            message += " Không thêm kiến thức ngoài tài liệu; hãy bổ sung tài liệu hoặc điều chỉnh phạm vi khi tạo bộ mới."
+        return {"questions": questions, "skipped": skipped[:20], "n_pool": len(pool), "graph_id": gid,
+                "requested_count": count, "generated_count": len(questions), "status": status, "message": message}
     if not pool:
-        raise HTTPException(400, "Không còn concept đủ bằng chứng cho phạm vi đã chọn")
-    import random
-    from concurrent.futures import ThreadPoolExecutor
+        return response([])
     rng = random.Random(payload.get("seed", 42))
     rng.shuffle(pool)
-    # Cover selected topics before filling the remaining slots, without duplicate concepts.
-    picked = []
-    groups = [[n for n in pool if matches(n, t)] for t in topics] if topics else [pool[:]]
-    while any(groups):
-        for group in groups:
-            if group:
-                node = group.pop(0)
-                if node not in picked:
-                    picked.append(node)
-    picked = picked[:count + 4]
-    def generate(batch):
-        items = [{"concept": n["name"], "definition": n.get("definition", ""),
-                  "quote": _evidence(n)[0]["quote"], "sources": [_evidence(n)[0]["source"]]}
-                 for n in batch]
-        raw = call_llm(QUIZ_SYSTEM, json.dumps({"level": level, "concepts": items}, ensure_ascii=False))
-        return batch, parse_json(raw)
-    try:
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            results = list(executor.map(generate, [picked[i:i+5] for i in range(0, len(picked), 5)]))
-    except Exception:
-        trace_log("quiz_failed", graph_id=gid)
-        raise HTTPException(502, "Không gọi được dịch vụ AI. Kiểm tra cấu hình API và thử lại.")
-    questions, used = [], set()
+    nodes = {n["id"]: n for n in pool}
+    evidence = {n["id"]: {f"e{i+1}": ev for i, ev in enumerate(_quiz_evidence(n))} for n in pool}
+    # Each concept belongs to one selected topic, preferring an exact name/alias match.
+    owners = {}
+    for n in pool:
+        exact = [t for t in topics if t.casefold() in
+                 {name.casefold() for name in [n["name"], *n.get("aliases", [])]}]
+        owners[n["id"]] = (exact or [t for t in topics if matches(n, t)] or [n["id"]])[0]
+    groups = list(dict.fromkeys(owners.values()))
+    group_weight = {g: len({_question_key(ev["quote"]) for cid in nodes if owners[cid] == g
+                           for ev in evidence[cid].values()}) for g in groups}
+    node_counts = dict.fromkeys(nodes, 0)
+    group_counts = dict.fromkeys(groups, 0)
+    for q in existing:
+        cid = q["concept_id"]
+        if q["status"] != "rejected" and cid in nodes:
+            node_counts[cid] += 1
+            group_counts[owners[cid]] += 1
+    requests = []
+    retained = sum(q["status"] != "rejected" for q in existing)
+    for i in range(count):
+        group = min(groups, key=lambda g: (group_counts[g], -group_weight[g], rng.random()))
+        cid = min((cid for cid in nodes if owners[cid] == group),
+                  key=lambda cid: (node_counts[cid], -len(evidence[cid]), rng.random()))
+        requests.append({"request_id": f"r{i+1}", "concept_id": cid,
+                         "level": level if level != "Kết hợp" else ("Dễ", "Trung bình", "Khó")[(retained+i) % 3]})
+        node_counts[cid] += 1
+        group_counts[group] += 1
+    known = [{k: q[k] for k in ("concept_id", "q", "a", "correct", "status", "original_q") if k in q}
+             for q in existing]
+    used = {_question_key(text) for q in existing for text in (q["q"], q.get("original_q", "")) if text}
+    questions, pending = [], requests
     reg = _load_registry()
-    for batch, parsed in results:
-        by_name = {n["name"].casefold(): n for n in batch}
+    chunk_cache = {}
+    # At most two calls: initial request, then only the unfilled request slots.
+    for attempt in range(2):
+        requested_ids = {r["concept_id"] for r in pending}
+        concepts = [{"concept_id": cid, "concept": nodes[cid]["name"],
+                     "definition": nodes[cid].get("definition", ""),
+                     "evidence": [{"evidence_id": eid, **ev} for eid, ev in evidence[cid].items()]}
+                    for cid in nodes if cid in requested_ids]
+        try:
+            raw = call_llm(QUIZ_SYSTEM, json.dumps({"concepts": concepts, "requests": pending,
+                           "existing_questions": known}, ensure_ascii=False))
+        except Exception:
+            trace_log("quiz_failed", graph_id=gid, attempt=attempt + 1)
+            raise HTTPException(502, "Không gọi được dịch vụ AI. Kiểm tra cấu hình API và thử lại.")
+        parsed = parse_json(raw)
         candidates = parsed.get("questions", []) if isinstance(parsed, dict) else []
+        slots = {r["request_id"]: r for r in pending}
         for q in candidates if isinstance(candidates, list) else []:
-            if not _valid_question(q) or not isinstance(q.get("concept"), str):
+            if not _valid_question(q) or not isinstance(q.get("request_id"), str):
                 continue
-            node = by_name.get(q["concept"].casefold())
-            if not node or node["id"] in used:
+            slot = slots.get(q["request_id"])
+            if not slot or q.get("concept_id") != slot["concept_id"] or not isinstance(q.get("evidence_id"), str):
                 continue
-            ev = _evidence(node)[0]
-            source = ev["source"]
+            cid = slot["concept_id"]
+            ev = evidence[cid].get(q["evidence_id"])
+            key = _question_key(q["q"])
+            if not ev or not key or key in used:
+                continue
+            node, source = nodes[cid], ev["source"]
             doc_id = source.get("doc_id") or (gid if gid in reg["docs"] else None)
-            chunks = []
-            if doc_id and _chunks_path(doc_id).exists():
-                chunks = json.loads(_chunks_path(doc_id).read_text(encoding="utf-8"))
-            chunk = next((c for c in chunks if (c.get("page"), c.get("turn")) ==
+            if doc_id not in chunk_cache:
+                cp = _chunks_path(doc_id) if doc_id else None
+                chunk_cache[doc_id] = json.loads(cp.read_text(encoding="utf-8")) if cp and cp.exists() else []
+            chunk = next((c for c in chunk_cache[doc_id] if (c.get("page"), c.get("turn")) ==
                           (source.get("page"), source.get("turn"))), {})
-            used.add(node["id"])
             questions.append({"q": q["q"], "a": q["a"], "correct": q["correct"],
-                "topic": node["name"], "level": level if level != "Kết hợp" else
-                    (q.get("level") if q.get("level") in ("Dễ", "Trung bình", "Khó") else "Trung bình"),
+                "topic": node["name"], "level": slot["level"],
                 "explain": q["explain"], "page": source.get("page"), "code": source.get("turn") or "—",
                 "title": chunk.get("section") or node["name"], "text": chunk.get("text", ev["quote"]),
                 "quote": ev["quote"], "source_file": source.get("file"), "source_doc_id": doc_id,
-                "concept_id": node["id"], "graph_id": gid})
-    questions = questions[:count]
-    trace_log("llm_quiz", graph_id=gid, n_questions=len(questions), n_concepts=len(picked))
-    if not questions:
-        raise HTTPException(502, "AI chưa trả về câu hỏi hợp lệ. Hãy thử lại.")
-    return {"questions": questions, "skipped": skipped[:20], "n_pool": len(pool), "graph_id": gid}
+                "concept_id": cid, "graph_id": gid})
+            used.add(key)
+            known.append({"concept_id": cid, "q": q["q"], "a": q["a"], "correct": q["correct"], "status": "pending"})
+            del slots[q["request_id"]]
+        pending = list(slots.values())
+        if not pending:
+            break
+    trace_log("llm_quiz", graph_id=gid, n_questions=len(questions), n_concepts=len(pool))
+    return response(questions)
 
 
 @APP.get("/api/trace")
