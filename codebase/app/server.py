@@ -10,8 +10,9 @@ Endpoints:
   POST /api/quiz            sinh quiz có evidence gate, trả đúng shape `bank` của UI
   GET  /api/trace           N lời gọi AI gần nhất (bằng chứng R5)
 
-Chạy: .venv/Scripts/python -m uvicorn app.server:app --port 8000
+Chạy: python server.py (từ thư mục gốc)
 """
+import copy
 import json
 import re
 import threading
@@ -24,9 +25,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))       # app/
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # codebase/
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
+from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 
 from pipeline import (CACHE, TRACE, UPLOADS, build_graph_for_file,
                       call_llm, file_sha256, is_junk, parse_json, trace_log)
@@ -35,7 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 REGISTRY = ROOT / "appdata" / "registry.json"
 APP = FastAPI(title="Lessonleaf API")
 
-_lock = threading.Lock()
+_lock = threading.RLock()
 JOBS = {}  # doc_id -> {"status", "progress", "total", "error"}
 
 
@@ -47,7 +48,9 @@ def _load_registry() -> dict:
 
 def _save_registry(reg: dict):
     REGISTRY.parent.mkdir(parents=True, exist_ok=True)
-    REGISTRY.write_text(json.dumps(reg, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp = REGISTRY.with_suffix(".tmp")
+    tmp.write_text(json.dumps(reg, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.replace(REGISTRY)
 
 
 def _chunks_path(sha: str) -> Path:
@@ -68,19 +71,18 @@ def _process(doc_id: str, path: Path, sha: str):
 
         result = build_graph_for_file(path, progress=progress)
 
-        # lưu chunks (kept) để View source đọc text gốc
-        chunks = result.pop("skipped", [])
-        _chunks_path(sha).parent.mkdir(parents=True, exist_ok=True)
-        # build_graph_for_file không trả kept chunks — viết lại từ raw provenance
-        reg = _load_registry()
-        reg["docs"][doc_id] = {
-            "doc_id": doc_id, "name": path.name, "sha": sha,
-            "stats": result["stats"], "n_nodes": len(result["nodes"]),
-            "n_edges": len(result["edges"]),
-            "built_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "from_cache": result.get("from_cache", False),
-        }
-        _save_registry(reg)
+        with _lock:
+            if doc_id not in _load_registry()["docs"]:
+                return
+            reg = _load_registry()
+            reg["docs"][doc_id] = {
+                "doc_id": doc_id, "name": path.name, "sha": sha,
+                "stats": result["stats"], "n_nodes": len(result["nodes"]),
+                "n_edges": len(result["edges"]),
+                "built_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "from_cache": result.get("from_cache", False),
+            }
+            _save_registry(reg)
         with _lock:
             JOBS[doc_id] = {"status": "ready", "progress": 1, "total": 1,
                             "n_nodes": len(result["nodes"]),
@@ -94,10 +96,12 @@ def _process(doc_id: str, path: Path, sha: str):
 
 @APP.post("/api/upload")
 async def upload(file: UploadFile = File(...)):
-    name = Path(file.filename).name
+    name = Path((file.filename or "").replace("\\", "/")).name
     if not re.search(r"\.(pdf|md|txt)$", name, re.IGNORECASE):
         raise HTTPException(400, "Chỉ hỗ trợ PDF / .md / .txt")
-    data = await file.read()
+    data = await file.read(20 * 1024 * 1024 + 1)
+    if not data:
+        raise HTTPException(400, "Tệp rỗng")
     if len(data) > 20 * 1024 * 1024:
         raise HTTPException(400, "Tệp vượt 20 MB")
     import hashlib
@@ -108,57 +112,57 @@ async def upload(file: UploadFile = File(...)):
     path = dir_ / name
     path.write_bytes(data)
 
-    reg = _load_registry()
-    reg["docs"][doc_id] = {
-        "doc_id": doc_id, "name": name, "sha": sha, "stats": {},
-        "n_nodes": 0, "n_edges": 0, "built_at": None, "from_cache": False,
-    }
-    _save_registry(reg)
-
-    # cache hit -> "xử lý" tức thì, 0 lời gọi AI
-    if (CACHE / f"{sha}.json").exists():
-        with _lock:
-            JOBS[doc_id] = {"status": "processing", "progress": 0, "total": 0}
-        threading.Thread(target=_process, args=(doc_id, path, sha), daemon=True).start()
-        return {"doc_id": doc_id, "sha": sha, "cached": True}
+    with _lock:
+        reg = _load_registry()
+        if JOBS.get(doc_id, {}).get("status") == "processing":
+            return {"doc_id": doc_id, "sha": sha, "cached": False}
+        reg["docs"][doc_id] = {
+            "doc_id": doc_id, "name": name, "sha": sha, "stats": {},
+            "n_nodes": 0, "n_edges": 0, "built_at": None, "from_cache": False,
+        }
+        _save_registry(reg)
+        JOBS[doc_id] = {"status": "processing", "progress": 0, "total": 0}
     threading.Thread(target=_process, args=(doc_id, path, sha), daemon=True).start()
-    return {"doc_id": doc_id, "sha": sha, "cached": False}
+    return {"doc_id": doc_id, "sha": sha, "cached": (CACHE / f"{sha}.json").exists()}
 
 
 @APP.get("/api/docs")
 def docs():
-    reg = _load_registry()
     with _lock:
+        reg = _load_registry()
         out = []
         for d in reg["docs"].values():
             job = JOBS.get(d["doc_id"], {})
-            status = job.get("status", "ready" if d["built_at"] else "queued")
+            status = job.get("status", "ready" if d["built_at"] else "error")
             out.append({**d, "status": status,
                         "progress": job.get("progress"), "total": job.get("total"),
-                        "error": job.get("error")})
+                        "error": job.get("error") or ("Xử lý bị gián đoạn. Hãy tải lại tệp." if status == "error" else None)})
     return out
 
 
 @APP.delete("/api/doc/{doc_id}")
 def delete_doc(doc_id: str):
-    reg = _load_registry()
-    doc = reg["docs"].get(doc_id)
-    if not doc:
-        raise HTTPException(404, "Không tìm thấy tài liệu")
-    # xóa graph của file + cache (xóa file = xóa graph, đúng yêu cầu)
-    import shutil
-    shutil.rmtree(UPLOADS / doc_id, ignore_errors=True)
-    (CACHE / f"{doc['sha']}.json").unlink(missing_ok=True)
-    del reg["docs"][doc_id]
-    # merge nào còn trỏ tới file đã xóa thì đánh dấu lỗi
-    for m in reg["merges"].values():
-        if doc_id in m.get("doc_ids", []):
-            m["stale"] = True
-    _save_registry(reg)
     with _lock:
-        JOBS.pop(doc_id, None)
-    trace_log("doc_deleted", doc_id=doc_id)
-    return {"ok": True}
+        reg = _load_registry()
+        doc = reg["docs"].get(doc_id)
+        if not doc:
+            raise HTTPException(404, "Không tìm thấy tài liệu")
+        if JOBS.get(doc_id, {}).get("status") == "processing":
+            raise HTTPException(409, "Tài liệu đang xử lý. Hãy chờ hoàn tất trước khi xóa.")
+        # xóa graph của file + cache (xóa file = xóa graph, đúng yêu cầu)
+        import shutil
+        shutil.rmtree(UPLOADS / doc_id, ignore_errors=True)
+        (CACHE / f"{doc['sha']}.json").unlink(missing_ok=True)
+        del reg["docs"][doc_id]
+        # merge nào còn trỏ tới file đã xóa thì đánh dấu lỗi
+        for m in reg["merges"].values():
+            if doc_id in m.get("doc_ids", []):
+                m["stale"] = True
+        _save_registry(reg)
+        with _lock:
+            JOBS.pop(doc_id, None)
+        trace_log("doc_deleted", doc_id=doc_id)
+        return {"ok": True}
 
 
 # ----------------------------------------------------------------- graph ---
@@ -172,7 +176,9 @@ def _get_graph(gid: str) -> dict:
             return json.loads(cached.read_text(encoding="utf-8"))
         raise HTTPException(404, "Graph chưa sẵn sàng")
     if gid in reg["merges"]:
-        return reg["merges"][gid]["graph"]
+        if reg["merges"][gid].get("stale"):
+            raise HTTPException(409, "Nguồn của graph ghép đã bị xóa. Hãy ghép lại tài liệu.")
+        return copy.deepcopy(reg["merges"][gid]["graph"])
     raise HTTPException(404, "Không tìm thấy graph")
 
 
@@ -185,6 +191,8 @@ def get_graph(gid: str):
 @APP.get("/api/source")
 def get_source(gid: str, page: int | None = None, turn: str | None = None):
     """Text gốc của 1 trang slide / 1 lượt nói (cho dialog View source)."""
+    if gid not in _load_registry()["docs"]:
+        raise HTTPException(404, "Không tìm thấy tài liệu nguồn")
     cp = _chunks_path(gid)
     if not cp.exists():
         raise HTTPException(404, "Không có chunks lưu cho tài liệu này")
@@ -208,7 +216,7 @@ Chỉ same=true khi chúng CHẮC CHẮN cùng một khái niệm ("LLM" và "la
 def merge(payload: dict):
     doc_ids = payload.get("doc_ids", [])
     reg = _load_registry()
-    if not 2 <= len(doc_ids) <= 3:
+    if not isinstance(doc_ids, list) or not all(isinstance(d, str) for d in doc_ids) or not 2 <= len(set(doc_ids)) == len(doc_ids) <= 3:
         raise HTTPException(400, "Chọn 2–3 tài liệu để ghép")
     graphs = []
     for did in doc_ids:
@@ -217,6 +225,7 @@ def merge(payload: dict):
         g = _get_graph(did)
         for n in g["nodes"]:
             n["_doc"] = did
+            n["evidence"] = [{**ev, "source": {**ev["source"], "doc_id": did}} for ev in _evidence(n)]
         graphs.append(g)
 
     # map id node cũ -> tên (để rewrite edges sau khi gộp)
@@ -236,6 +245,8 @@ def merge(payload: dict):
                 if n["confidence"] > m["confidence"]:
                     m["definition"] = n["definition"]
                 m["confidence"] = max(m["confidence"], n["confidence"])
+                m["evidence"].extend(n["evidence"])
+                m["aliases"] = sorted(set(m.get("aliases", []) + n.get("aliases", [])))
                 m["quotes"].extend(q for q in n["quotes"] if q not in m["quotes"])
                 m["sources"].extend(s for s in n["sources"] if s not in m["sources"])
                 continue
@@ -259,12 +270,16 @@ def merge(payload: dict):
             if pair in checked:
                 continue
             checked.add(pair)
-            raw = call_llm(JUDGE_SYSTEM, f"Tên 1: {a['name']}\nTên 2: {b['name']}")
+            try:
+                raw = call_llm(JUDGE_SYSTEM, f"Tên 1: {a['name']}\nTên 2: {b['name']}")
+            except Exception:
+                raise HTTPException(502, "Không gọi được AI để ghép graph. Hãy thử lại.")
             llm_calls += 1
             verdict = parse_json(raw) or {}
             if verdict.get("same"):
                 keep, away = (a, b) if a["id"] < b["id"] else (b, a)
-                keep["aliases"] = sorted(set(keep.get("aliases", []) + [away["name"]]))
+                keep["aliases"] = sorted(set(keep.get("aliases", []) + away.get("aliases", []) + [away["name"]]))
+                keep["evidence"].extend(away["evidence"])
                 keep["quotes"].extend(q for q in away["quotes"] if q not in keep["quotes"])
                 keep["sources"].extend(s for s in away["sources"] if s not in keep["sources"])
                 keep["_dup_docs"].extend(away["_dup_docs"])
@@ -276,7 +291,8 @@ def merge(payload: dict):
     # edges: map id cũ qua tên -> id mới (node trùng đã gộp nên edge tự nối đúng)
     by_key = {}
     for n in nodes.values():
-        by_key[_norm_key(n["name"])] = n["id"]
+        for name in [n["name"], *n.get("aliases", [])]:
+            by_key[_norm_key(name)] = n["id"]
     edges = []
     seen_edges = set()
     for g, did in zip(graphs, doc_ids):
@@ -289,11 +305,11 @@ def merge(payload: dict):
             if key in seen_edges:
                 continue  # trùng cạnh khi ghép 2 file cùng khái niệm
             seen_edges.add(key)
-            edges.append(e)
+            edges.append({**e, "source": s, "target": t})
     mid = f"merge_{uuid.uuid4().hex[:8]}"
     graph = {"meta": {"n_nodes": len(nodes), "n_edges": len(edges)},
              "nodes": list(nodes.values()), "edges": edges}
-    reg["merges"][mid] = {
+    merged_record = {
         "merge_id": mid, "doc_ids": doc_ids, "graph": graph,
         "report": {
             "n_before": sum(len(g["nodes"]) for g in graphs),
@@ -305,7 +321,12 @@ def merge(payload: dict):
         },
         "built_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    _save_registry(reg)
+    with _lock:
+        reg = _load_registry()
+        if any(did not in reg["docs"] for did in doc_ids):
+            raise HTTPException(409, "Tài liệu đã bị xóa trong lúc ghép")
+        reg["merges"][mid] = merged_record
+        _save_registry(reg)
     trace_log("merge", merges=mid, llm_calls=llm_calls,
               before=reg["merges"][mid]["report"]["n_before"],
               after=len(nodes))
@@ -321,178 +342,184 @@ def _norm_key(s: str) -> str:
 
 # ------------------------------------------------------------------ quiz --
 
-QUIZ_SYSTEM = """Bạn là người ra đề quiz cho bài giảng AI (tiếng Việt), sinh câu hỏi TỪ KNOWLEDGE GRAPH.
-Mỗi concept bạn nhận có: name, definition, quote nguyên văn từ tài liệu, provenance (trang slide / lượt nói).
-QUY TẮC:
-1. Chỉ dùng nội dung trong payload — không thêm tri thức ngoài.
-2. Mỗi câu: 4 phương án, đúng 1; distractor là khái niệm khác trong payload (nhiễu hợp lý).
-3. explanation phải dựa trên quote nguyên văn của concept.
-4. Độ khó do NGƯỜI DÙNG chỉ định trong payload-level. Chỉ dùng đúng level đó cho MỌI câu:
-   "Dễ" = hỏi định nghĩa trực tiếp; "Trung bình" = so sánh/quan hệ giữa khái niệm, tình huống vận dụng nhẹ;
-   "Khó" = case ứng dụng, phân tích, loại trừ nhiễu. KHÔNG tự gán level khác.
-   (Nếu payload-level là "Kết hợp" thì trộn đều 3 mức.)
-5. Không nhắc "theo slide/trang" trong câu hỏi — nguồn chỉ để giảng viên kiểm tra.
-6. SINH ĐỦ MỘT CÂU CHO TỪNG CONCEPT TRONG PAYLOAD — không bỏ sót, không sinh thêm concept khác.
-Xuất JSON: {"questions": [{"concept": "<name đúng như payload>", "q": "...", "a": ["","","",""],
- "correct": 0, "level": "<payload-level>", "explain": "..."}]}"""
+QUIZ_SYSTEM = """Bạn ra đề quiz tiếng Việt CHỈ từ bằng chứng trong payload.
+Payload có concepts (concept_id, definition, evidence gồm evidence_id/quote/source),
+requests (request_id, concept_id, level) và existing_questions cần tránh lặp.
+Sinh một câu cho mỗi request, đúng concept_id và level yêu cầu; mỗi câu 4 phương án
+khác nhau, đúng một đáp án, giải thích dựa vào evidence_id thuộc concept đó.
+Các câu cùng concept phải kiểm tra các ý khác nhau; không chỉ diễn đạt lại cùng câu.
+Tận dụng nhiều bằng chứng khi có. Không lặp existing_questions kể cả câu bị rejected.
+Không thêm kiến thức ngoài tài liệu. Nếu không đủ nội dung cho một request thì bỏ qua,
+không bịa để đủ số. Không nhắc số trang trong câu hỏi.
+Dễ: định nghĩa; Trung bình: quan hệ/vận dụng nhẹ; Khó: phân tích tình huống có căn cứ.
+Chỉ trả JSON: {"questions": [{"request_id": "r1", "concept_id": "c1",
+"evidence_id": "e1", "q": "...", "a": ["...","...","...","..."],
+"correct": 0, "explain": "..."}]}"""
+
+
+def _evidence(node):
+    pairs = node.get("evidence") or []
+    if not pairs and node.get("quotes") and node.get("sources"):
+        # Compatibility with graphs produced before paired evidence was stored.
+        pairs = [{"quote": node["quotes"][0], "source": node["sources"][0]}]
+    return [e for e in pairs if isinstance(e, dict) and e.get("quote") and
+            isinstance(e.get("source"), dict) and
+            (e["source"].get("page") or e["source"].get("turn"))]
+
+
+def _valid_question(q):
+    return (isinstance(q, dict) and isinstance(q.get("q"), str) and 0 < len(q["q"].strip()) <= 1000
+            and isinstance(q.get("a"), list) and len(q["a"]) == 4
+            and all(isinstance(a, str) and 0 < len(a.strip()) <= 500 for a in q["a"])
+            and len({a.strip().casefold() for a in q["a"]}) == 4
+            and type(q.get("correct")) is int and 0 <= q["correct"] < 4
+            and isinstance(q.get("explain"), str) and 0 < len(q["explain"].strip()) <= 2000)
+
+
+def _question_key(text):
+    # Preserve Vietnamese accents while ignoring casing, punctuation and spacing.
+    return " ".join(re.findall(r"\w+", unicodedata.normalize("NFKC", text).casefold()))
+
+
+def _quiz_evidence(node):
+    seen, result = set(), []
+    for ev in _evidence(node):
+        if not isinstance(ev["quote"], str):
+            continue
+        key = _question_key(ev["quote"])
+        if key and key not in seen:
+            seen.add(key)
+            result.append(ev)
+    return result
 
 
 @APP.post("/api/quiz")
 def quiz(payload: dict):
-    gid = payload["graph_id"]
-    count = int(payload.get("count", 6))
-    level = payload.get("level", "Kết hợp")          # Dễ | Trung bình | Khó | Kết hợp
-    topics = payload.get("topics") or []             # rỗng = toàn bài
-    g = _get_graph(gid)
-
-    # EVIDENCE GATE: chỉ concept có quote + nguồn; thiếu bằng chứng -> skip + báo
-    pool = [n for n in g["nodes"]
-            if n.get("quotes") and n.get("sources") and n["type"] == "concept"]
-    skipped = sorted(n["name"] for n in g["nodes"]
-                     if n["type"] == "concept" and n not in pool)
-    if topics:
-        wanted = {t.lower() for t in topics}
-        def _match(n):
-            hay = {n["name"].lower(), *{a.lower() for a in n.get("aliases", [])}}
-            # substring 2 chiều: "agent" khớp "Agent trong AI", "Transformer" khớp "Transformers"
-            return any(w in h or h in w for h in hay for w in wanted if len(w) >= 4 or len(h) >= 4)
-        pool = [n for n in pool if _match(n)]
-    if not pool:
-        raise HTTPException(400, "Không có concept đủ bằng chứng cho phạm vi đã chọn")
-
-    # đọc chunks để trả title/text cho View source (shape `bank` của UI)
-    chunks = {}
-    cp = _chunks_path(gid)
-    if cp.exists():
-        for c in json.loads(cp.read_text(encoding="utf-8")):
-            key = (c.get("page"), c.get("turn"))
-            chunks[key] = c
-
     import random
-    random.seed(int(payload.get("seed", 42)))
-    random.shuffle(pool)
-    # Chọn phủ đều topic: chia vòng tròn (round-robin) từng nhóm topic,
-    # mỗi vòng lấy 1 concept mới của mỗi topic — không topic nào bị bỏ qua.
-    if topics and len(topics) > 1:
-        wanted = [t.lower() for t in topics]
-        def _owns(n, w):
-            hay = {n["name"].lower(), *{a.lower() for a in n.get("aliases", [])}}
-            # topic ngắn (<4 ký tự như "GPT", "AI") chỉ khớp prefix/đúng từ,
-            # topic dài khớp substring 2 chiều
-            return any(h == w or (len(w) >= 4 and (w in h or h in w))
-                       or (len(w) < 4 and h.startswith(w + " ")) for h in hay)
-        groups = {w: [n for n in pool if _owns(n, w)] for w in wanted}
-        for g in groups.values():
-            random.shuffle(g)
-        picked, order = [], list(wanted)
-        i = 0
-        while len(picked) < count + 4 and any(groups[g] for g in order):
-            w = order[i % len(order)]
-            if groups[w]:
-                picked.append(groups[w].pop(0))
-            i += 1
-            if i > 500:
-                break
-        # nhóm còn dư (ít topic) bổ sung vào cuối
-        rest = [n for g in groups.values() for n in g]
-        random.shuffle(rest)
-        picked += rest
-        picked = picked[: max(count + 4, 1)]
-    else:
-        picked = pool[: max(count + 4, 1)]  # dư 4 concept dự phòng: LLM thỉnh thoảng trả thiếu
-    # sinh theo lô 5 concept/1 call, CÁC LÔ CHẠY SONG SONG (tổng thời gian = 1 lô)
-    from concurrent.futures import ThreadPoolExecutor
-
-    batches = [picked[i:i + 5] for i in range(0, len(picked), 5)]
-
-    def _gen_batch(batch):
-        payload_llm = [{"concept": n["name"], "definition": n["definition"],
-                        "quote": n["quotes"][0], "sources": [n["sources"][0]]}
-                       for n in batch]
-        last_err = None
-        for attempt in range(3):
-            try:
-                raw = call_llm(QUIZ_SYSTEM, json.dumps(
-                    {"level": level, "concepts": payload_llm}, ensure_ascii=False))
-                return batch, parse_json(raw)
-            except Exception as e:
-                last_err = e
-                trace_log("quiz_retry", attempt=attempt + 1)
-        raise last_err
-
-    with ThreadPoolExecutor(max_workers=4) as ex:
-        results = list(ex.map(_gen_batch, batches))
-
-    questions = []
-    for batch_idx, (batch, parsed) in enumerate(results, 1):
-        by_name = {n["name"].lower(): n for n in batch}
-        for q in parsed.get("questions", []):
-            node = by_name.get(q.get("concept", "").lower())
-            if not node:
-                continue  # concept ngoài batch -> loại (chống ảo giác)
-            # provenance ghép đôi: nguồn của CHÍNH quote dùng sinh câu
-            ev = {"quote": node["quotes"][0], "source": node["sources"][0]}
-            page, code, title, text = None, None, node["name"], ev["quote"]
-            s = ev["source"]
-            c = chunks.get((s.get("page"), s.get("turn")))
-            if s.get("page") is not None:
-                page = s["page"]
-                if c:
-                    title = c["text"].split("\n")[0][:80]
-                    text = c["text"]
-            elif s.get("turn"):
-                code = s["turn"]
-                if c:
-                    title = c.get("section") or node["name"]
-                    text = c["text"]
-            questions.append({
-                "topic": node["name"],
-                "level": level if level != "Kết hợp" else q.get("level", "Trung bình"),
-                "q": q.get("q"), "a": q.get("a"), "correct": q.get("correct"),
-                "page": page, "page_total": 24, "code": code or "—",
-                "title": title, "text": text, "explain": q.get("explain", ""),
-                "quote": ev["quote"],
-                "concept_id": node["id"],
-            })
-        trace_log("llm_quiz", batch=batch_idx, n_concepts=len(batch),
-                  n_questions=len(parsed.get("questions", [])))
-    # lọc câu lỗi (thiếu q/a/correct) rồi cắt đúng count
-    questions = [q for q in questions if q.get("q") and q.get("a") and 4 > q.get("correct", -1) >= 0]
-    questions = questions[:count]
-    # thiếu thì sinh bù TRONG CÙNG 1 request: dùng concept chưa dùng trong pool
-    if len(questions) < count:
-        used_ids = {q["concept_id"] for q in questions}
-        rest = [n for n in pool if n["id"] not in used_ids][: count - len(questions)]
-        if rest:
-            payload_llm = [{"concept": n["name"], "definition": n["definition"],
-                            "quote": n["quotes"][0], "sources": [n["sources"][0]]} for n in rest]
-            try:
-                raw = call_llm(QUIZ_SYSTEM, json.dumps({"level": level, "concepts": payload_llm}, ensure_ascii=False))
-                extra = parse_json(raw).get("questions", [])
-                by_name = {n["name"].lower(): n for n in rest}
-                for q in extra:
-                    node = by_name.get(q.get("concept", "").lower())
-                    if not node:
-                        continue
-                    page, code = None, "—"
-                    for s in node["sources"]:
-                        if s.get("page") is not None:
-                            page = s["page"]
-                    questions.append({
-                        "topic": node["name"],
-                        "level": level if level != "Kết hợp" else q.get("level", "Trung bình"),
-                        "q": q.get("q"), "a": q.get("a"), "correct": q.get("correct"),
-                        "page": page, "page_total": 24, "code": code,
-                        "title": node["name"], "text": node["quotes"][0],
-                        "explain": q.get("explain", ""), "quote": node["quotes"][0],
-                        "concept_id": node["id"],
-                    })
-                trace_log("llm_quiz_topup", n_needed=count - len(questions) + len(rest))
-            except Exception as e:
-                trace_log("quiz_topup_failed", err=str(e)[:100])
-        questions = questions[:count]
-    return {"questions": questions, "skipped": skipped[:20],
-            "n_pool": len(pool), "graph_id": gid}
+    gid, count = payload.get("graph_id"), payload.get("count", 6)
+    level, topics = payload.get("level", "Kết hợp"), payload.get("topics", [])
+    excluded = payload.get("exclude_concept_ids", [])
+    existing = payload.get("existing_questions", [])
+    if (not isinstance(gid, str) or type(count) is not int or not 1 <= count <= 100
+            or level not in ("Dễ", "Trung bình", "Khó", "Kết hợp")
+            or not isinstance(topics, list) or not all(isinstance(t, str) and t.strip() for t in topics)
+            or not isinstance(excluded, list) or not all(isinstance(i, str) for i in excluded)
+            or type(payload.get("seed", 42)) is not int
+            or not isinstance(existing, list) or len(existing) > 1000):
+        raise HTTPException(400, "Cấu hình sinh quiz không hợp lệ")
+    for q in existing:
+        if (not isinstance(q, dict) or not isinstance(q.get("concept_id"), str)
+                or not _valid_question({**q, "explain": "existing"})
+                or q.get("status") not in ("pending", "approved", "rejected")
+                or not isinstance(q.get("original_q", ""), str)
+                or len(q.get("original_q", "")) > 1000):
+            raise HTTPException(400, "Danh sách câu hỏi hiện tại không hợp lệ")
+    graph = _get_graph(gid)
+    pool = [n for n in graph["nodes"] if n.get("type") == "concept" and _quiz_evidence(n)
+            and n["id"] not in excluded]
+    skipped = [n["name"] for n in graph["nodes"] if n.get("type") == "concept" and not _quiz_evidence(n)]
+    def matches(n, topic):
+        wanted = topic.casefold()
+        return any(wanted == name.casefold() or
+                   (len(wanted) >= 4 and wanted in name.casefold()) or
+                   name.casefold().startswith(wanted + " ")
+                   for name in [n["name"], *n.get("aliases", [])])
+    if topics:
+        pool = [n for n in pool if any(matches(n, t) for t in topics)]
+    def response(questions):
+        status = "complete" if len(questions) == count else "partial" if questions else "insufficient_evidence"
+        message = (f"Đã tạo {len(questions)}/{count} câu hỏi có nguồn."
+                   if questions else f"Đã tạo 0/{count} câu: chưa có câu mới hợp lệ từ bằng chứng trong phạm vi đã chọn.")
+        if status != "complete":
+            message += " Không thêm kiến thức ngoài tài liệu; hãy bổ sung tài liệu hoặc điều chỉnh phạm vi khi tạo bộ mới."
+        return {"questions": questions, "skipped": skipped[:20], "n_pool": len(pool), "graph_id": gid,
+                "requested_count": count, "generated_count": len(questions), "status": status, "message": message}
+    if not pool:
+        return response([])
+    rng = random.Random(payload.get("seed", 42))
+    rng.shuffle(pool)
+    nodes = {n["id"]: n for n in pool}
+    evidence = {n["id"]: {f"e{i+1}": ev for i, ev in enumerate(_quiz_evidence(n))} for n in pool}
+    # Each concept belongs to one selected topic, preferring an exact name/alias match.
+    owners = {}
+    for n in pool:
+        exact = [t for t in topics if t.casefold() in
+                 {name.casefold() for name in [n["name"], *n.get("aliases", [])]}]
+        owners[n["id"]] = (exact or [t for t in topics if matches(n, t)] or [n["id"]])[0]
+    groups = list(dict.fromkeys(owners.values()))
+    group_weight = {g: len({_question_key(ev["quote"]) for cid in nodes if owners[cid] == g
+                           for ev in evidence[cid].values()}) for g in groups}
+    node_counts = dict.fromkeys(nodes, 0)
+    group_counts = dict.fromkeys(groups, 0)
+    for q in existing:
+        cid = q["concept_id"]
+        if q["status"] != "rejected" and cid in nodes:
+            node_counts[cid] += 1
+            group_counts[owners[cid]] += 1
+    requests = []
+    retained = sum(q["status"] != "rejected" for q in existing)
+    for i in range(count):
+        group = min(groups, key=lambda g: (group_counts[g], -group_weight[g], rng.random()))
+        cid = min((cid for cid in nodes if owners[cid] == group),
+                  key=lambda cid: (node_counts[cid], -len(evidence[cid]), rng.random()))
+        requests.append({"request_id": f"r{i+1}", "concept_id": cid,
+                         "level": level if level != "Kết hợp" else ("Dễ", "Trung bình", "Khó")[(retained+i) % 3]})
+        node_counts[cid] += 1
+        group_counts[group] += 1
+    known = [{k: q[k] for k in ("concept_id", "q", "a", "correct", "status", "original_q") if k in q}
+             for q in existing]
+    used = {_question_key(text) for q in existing for text in (q["q"], q.get("original_q", "")) if text}
+    questions, pending = [], requests
+    reg = _load_registry()
+    chunk_cache = {}
+    # At most two calls: initial request, then only the unfilled request slots.
+    for attempt in range(2):
+        requested_ids = {r["concept_id"] for r in pending}
+        concepts = [{"concept_id": cid, "concept": nodes[cid]["name"],
+                     "definition": nodes[cid].get("definition", ""),
+                     "evidence": [{"evidence_id": eid, **ev} for eid, ev in evidence[cid].items()]}
+                    for cid in nodes if cid in requested_ids]
+        try:
+            raw = call_llm(QUIZ_SYSTEM, json.dumps({"concepts": concepts, "requests": pending,
+                           "existing_questions": known}, ensure_ascii=False))
+        except Exception:
+            trace_log("quiz_failed", graph_id=gid, attempt=attempt + 1)
+            raise HTTPException(502, "Không gọi được dịch vụ AI. Kiểm tra cấu hình API và thử lại.")
+        parsed = parse_json(raw)
+        candidates = parsed.get("questions", []) if isinstance(parsed, dict) else []
+        slots = {r["request_id"]: r for r in pending}
+        for q in candidates if isinstance(candidates, list) else []:
+            if not _valid_question(q) or not isinstance(q.get("request_id"), str):
+                continue
+            slot = slots.get(q["request_id"])
+            if not slot or q.get("concept_id") != slot["concept_id"] or not isinstance(q.get("evidence_id"), str):
+                continue
+            cid = slot["concept_id"]
+            ev = evidence[cid].get(q["evidence_id"])
+            key = _question_key(q["q"])
+            if not ev or not key or key in used:
+                continue
+            node, source = nodes[cid], ev["source"]
+            doc_id = source.get("doc_id") or (gid if gid in reg["docs"] else None)
+            if doc_id not in chunk_cache:
+                cp = _chunks_path(doc_id) if doc_id else None
+                chunk_cache[doc_id] = json.loads(cp.read_text(encoding="utf-8")) if cp and cp.exists() else []
+            chunk = next((c for c in chunk_cache[doc_id] if (c.get("page"), c.get("turn")) ==
+                          (source.get("page"), source.get("turn"))), {})
+            questions.append({"q": q["q"], "a": q["a"], "correct": q["correct"],
+                "topic": node["name"], "level": slot["level"],
+                "explain": q["explain"], "page": source.get("page"), "code": source.get("turn") or "—",
+                "title": chunk.get("section") or node["name"], "text": chunk.get("text", ev["quote"]),
+                "quote": ev["quote"], "source_file": source.get("file"), "source_doc_id": doc_id,
+                "concept_id": cid, "graph_id": gid})
+            used.add(key)
+            known.append({"concept_id": cid, "q": q["q"], "a": q["a"], "correct": q["correct"], "status": "pending"})
+            del slots[q["request_id"]]
+        pending = list(slots.values())
+        if not pending:
+            break
+    trace_log("llm_quiz", graph_id=gid, n_questions=len(questions), n_concepts=len(pool))
+    return response(questions)
 
 
 @APP.get("/api/trace")
@@ -503,11 +530,58 @@ def trace(n: int = 20):
     return [json.loads(l) for l in lines if l.strip()]
 
 
-# ----------------------------------------------------------------- static -
+# Serve only public assets; never mount the repository or uploaded data.
+import importlib.util
+_live_spec = importlib.util.spec_from_file_location("lessonleaf_live", ROOT / "server.py")
+_live = importlib.util.module_from_spec(_live_spec)
+_live_spec.loader.exec_module(_live)
+STORE = _live.STORE
+
+
+@APP.exception_handler(_live.APIError)
+async def room_error(request, exc):
+    return JSONResponse({"error": str(exc)}, status_code=exc.status)
+
+
+@APP.post("/api/rooms", status_code=201)
+def create_room(payload: dict):
+    with STORE.lock:
+        return STORE.create(payload)
+
+
+@APP.get("/api/rooms/{pin}")
+def room_state(pin: str, request: Request):
+    with STORE.lock:
+        return STORE.state(STORE.room(pin), request.headers.get("authorization", "").removeprefix("Bearer "))
+
+
+@APP.post("/api/rooms/{pin}/{action}")
+def room_action(pin: str, action: str, payload: dict, request: Request):
+    token = request.headers.get("authorization", "").removeprefix("Bearer ")
+    with STORE.lock:
+        room = STORE.room(pin)
+        if action == "join":
+            return JSONResponse(STORE.join(room, payload), status_code=201)
+        if action == "answer":
+            STORE.answer(room, token, payload)
+        else:
+            STORE.action(room, token, action, payload)
+        return STORE.state(room, token)
+
+
+@APP.get("/api/merges")
+def list_merges():
+    return [{k: v for k, v in m.items() if k != "graph"} for m in _load_registry()["merges"].values()]
+
 
 @APP.get("/")
 def index():
-    return FileResponse(ROOT / "codebase" / "app" / "static" / "index1.html")
+    return FileResponse(ROOT / "index1.html")
 
 
-APP.mount("/static", StaticFiles(directory=ROOT / "codebase" / "app" / "static"), name="static")
+@APP.get("/static/{name}")
+@APP.get("/{name}")
+def asset(name: str):
+    if name not in {"index1.html", "live.html", "live.js", "live.css"}:
+        raise HTTPException(404, "Không tìm thấy trang")
+    return FileResponse(ROOT / name)

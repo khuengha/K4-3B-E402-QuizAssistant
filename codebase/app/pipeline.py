@@ -97,13 +97,16 @@ def build_graph_for_file(path: Path, force: bool = False,
     Trả: {sha, from_cache, nodes, edges, stats, skipped:[...]}
     """
     sha = file_sha256(path)
+    chunks = ingest_file(path)
+    chunks_path = UPLOADS / sha[:12] / "chunks.json"
+    chunks_path.parent.mkdir(parents=True, exist_ok=True)
+    chunks_path.write_text(json.dumps(chunks, ensure_ascii=False), encoding="utf-8")
     if not force:
         cached = cache_get(sha)
         if cached:
             trace_log("cache_hit", sha=sha[:12], file=path.name)
             return {**cached, "from_cache": True}
 
-    chunks = ingest_file(path)                       # logic ingestion cũ
     kept, skipped = [], []
     for c in chunks:
         reason = is_junk(c["text"])

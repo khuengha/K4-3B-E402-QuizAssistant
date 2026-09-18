@@ -116,31 +116,35 @@ def ingest_file(path):
         doc_id = path.stem[:2].upper()
         chunks = []
         current_section = ""
-        token_re = re.compile(r"^(#{2,3}\s+.+|\*\*\[[^\]]+\]\*\*.*)$", re.MULTILINE)
-        for m in token_re.finditer(content):
-            line = m.group(0).strip()
-            if line.startswith("#"):
-                current_section = line.lstrip("# ").strip()
+        # Preserve multiline turns; ordinary Markdown/TXT also works without turn markers.
+        tokens = list(re.finditer(r"^(#{1,6}\s+[^\n]+|\*\*\[[^\]]+\]\*\*)", content, re.MULTILINE))
+        spans = []
+        if not tokens:
+            spans = [("", None, content)]
+        else:
+            if content[:tokens[0].start()].strip():
+                spans.append(("", None, content[:tokens[0].start()]))
+            for i, token in enumerate(tokens):
+                marker = token.group(0)
+                end = tokens[i + 1].start() if i + 1 < len(tokens) else len(content)
+                if marker.startswith('#'):
+                    current_section = marker.lstrip('# ').strip()
+                    turn = None
+                else:
+                    turn = marker[3:-3]
+                spans.append((current_section, turn, content[token.end():end]))
+        for section, turn, body in spans:
+            if SKIP_SECTION_RE.search(section):
                 continue
-            turn_match = re.match(r"\*\*\[([^\]]+)\]\*\*\s*(.*)", line, re.DOTALL)
-            if not turn_match:
-                continue
-            turn_id, text = turn_match.group(1), turn_match.group(2).strip()
-            if not text or len(text) < 40:
-                continue
-            if SKIP_SECTION_RE.search(current_section):
-                continue
-            if re.match(r"^\[(Hoạt động lớp|học viên|không nghe rõ)", text):
-                continue
-            chunks.append({
-                "chunk_id": f"{doc_id}-{turn_id}",
-                "source_type": "transcript",
-                "doc_id": doc_id,
-                "file": path.name,
-                "turn": turn_id,
-                "section": current_section,
-                "text": text,
-            })
+            body = body.strip()
+            for offset in range(0, len(body), 3000):
+                text = body[offset:offset + 3000].strip()
+                if not text:
+                    continue
+                code = (turn + (f"-{offset // 3000 + 1}" if offset else "")) if turn else f"TXT-{len(chunks) + 1:03d}"
+                chunks.append({"chunk_id": f"{doc_id}-{code}", "source_type": "transcript",
+                               "doc_id": doc_id, "file": path.name, "turn": code,
+                               "section": section, "text": text})
         return chunks
     raise ValueError(f"Định dạng chưa hỗ trợ: {path.suffix} (chỉ PDF/.md/.txt)")
 

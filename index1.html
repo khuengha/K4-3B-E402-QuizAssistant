@@ -463,6 +463,13 @@
             margin-bottom: 17px
         }
 
+        .result-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
         .kicker {
             font-size: 10px;
             letter-spacing: 1.6px;
@@ -2146,6 +2153,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="live.css">
 </head>
 
 <body>
@@ -2209,6 +2217,9 @@
                         accept=".pdf,.md,.txt" multiple hidden><button class="upload" id="add-files">+
                         &nbsp; Thêm tài liệu</button>
                     <p class="upload-help">PDF, MD, TXT · Tối đa 20 MB/tệp.</p>
+                    <label class="field" for="graph-select">Nguồn tạo quiz</label><select id="graph-select"><option value="">Chưa có tài liệu</option></select>
+                    <button class="upload" id="merge-docs" disabled>Ghép 2–3 tài liệu đã chọn</button>
+                    <p id="doc-error" class="upload-help" role="status"></p>
                     <div class="graph" id="kg-badge"><span class="dot"></span>Knowledge Graph · đang tải…</div>
                 </section>
                 <section class="section">
@@ -2218,7 +2229,7 @@
                                 id="count">6</output><button id="plus" aria-label="Tăng số câu">+</button></div>
                     </div><label class="field" style="margin-top:18px">Độ khó</label>
                     <div class="seg" id="levels"><button data-level="Dễ">Dễ</button><button
-                            data-level="Trung bình">Trung bình</button><button data-level="Kết hợp" class="active">Kết
+                            data-level="Trung bình">Trung bình</button><button data-level="Khó">Khó</button><button data-level="Kết hợp" class="active">Kết
                             hợp</button></div><label class="field" for="scope">Phạm vi kiến thức</label><select
                         id="scope">
                         <option value="all">Tất cả chủ đề</option>
@@ -2238,11 +2249,11 @@
                 <div class="result-head">
                     <div>
                         <div class="kicker">TRẠM KHÁM PHÁ KIẾN THỨC</div>
-                        <h2>Khám phá mô hình ngôn ngữ</h2>
-                        <p class="sub" id="result-description">Chưa tạo bộ quiz · Introduction to LLM</p>
-                    </div><button class="outline" id="export" disabled><svg>
+                        <h2>Khám phá bài giảng</h2>
+                        <p class="sub" id="result-description">Chưa tạo bộ quiz · Thêm tài liệu để bắt đầu</p>
+                    </div><div class="result-actions"><button class="outline play-quiz" id="play-quiz" disabled>▷ Play Quiz</button><button class="outline" id="export" disabled><svg>
                             <use href="#download" />
-                        </svg>Xuất quiz</button>
+                        </svg>Xuất quiz</button></div>
                 </div>
                 <section class="path-panel" id="path-panel" role="status" aria-live="polite" hidden>
                     <div class="kicker" id="path-label"></div>
@@ -2265,7 +2276,7 @@
                 <div id="loading-state" class="loading-state" role="status" aria-live="polite" hidden>
                     <div class="loading-spinner" aria-hidden="true"></div>
                     <h2>AI đang sinh câu hỏi từ knowledge graph…</h2>
-                    <p id="loading-detail">Kiểm tra căn cứ và chuẩn bị câu hỏi theo cấu hình của bạn.</p><span class="sub">AI thật · GPT-4o-mini · <span id="loading-elapsed">0s</span></span>
+                    <p id="loading-detail">Kiểm tra căn cứ và chuẩn bị câu hỏi theo cấu hình của bạn.</p><span class="sub">Sinh từ nội dung tài liệu đã chọn</span>
                     <div class="skeleton-card" aria-hidden="true">
                         <div></div>
                         <div></div>
@@ -2344,7 +2355,7 @@
                 <option value="3">D</option>
             </select><label for="edit-explanation">Giải thích dựa trên nguồn</label><textarea id="edit-explanation"
                 required maxlength="2000"></textarea>
-            <p class="upload-help">Sau khi lưu, câu hỏi trở về Chờ duyệt. Giảng viên cần đối chiếu lại nguồn; mock không
+            <p class="upload-help">Sau khi lưu, câu hỏi trở về Chờ duyệt. Giảng viên cần đối chiếu lại nguồn; hệ thống không
                 tự xác minh nội dung sửa.</p>
             <p class="edit-error" id="edit-error" role="alert"></p>
             <div class="edit-footer"><button type="button" class="outline" id="edit-cancel">Hủy</button><button
@@ -2370,34 +2381,17 @@
     </dialog>
     <div class="toast" role="status" id="toast"></div>
     <script>
-        // Additional mock questions share the same cited lesson excerpts.
-        const extraQuestions = [
-            [0, 'Token có thể biểu diễn thành phần nào sau đây?', ['Chỉ một câu hoàn chỉnh', 'Một phần của từ hoặc dấu câu', 'Chỉ số của trang slide', 'Chỉ một đoạn văn'], 1],
-            [0, 'Trước khi xử lý ngôn ngữ, văn bản được biểu diễn thành gì?', ['Các token', 'Các tên tệp', 'Các trang trình chiếu', 'Các nhãn màu'], 0],
-            [4, 'Hai tokenizer khác nhau có luôn tạo cùng số token không?', ['Có, với mọi văn bản', 'Có, nếu văn bản có dấu câu', 'Không, cách phân tách có thể khác nhau', 'Không, vì tokenizer luôn bỏ từ'], 2],
-            [4, 'Nhận định nào đúng về mối quan hệ giữa từ và token?', ['Một từ luôn bằng một token', 'Một token luôn bằng một câu', 'Số từ luôn lớn hơn số token', 'Một từ có thể gồm nhiều token'], 3],
-            [1, 'Prompt yêu cầu trả lời bằng bảng đang chỉ rõ điều gì?', ['Định dạng đầu ra', 'Trọng số mô hình', 'Thuật toán huấn luyện', 'Dung lượng bộ nhớ'], 0],
-            [1, 'Muốn mô hình tóm tắt bài giảng thành ba ý, nên viết yêu cầu nào?', ['Hãy làm gì đó với bài giảng', 'Tóm tắt bài giảng này thành ba ý chính', 'Hãy trả lời thật dài', 'Bỏ qua nội dung bài giảng'], 1],
-            [6, 'Ví dụ minh họa trong prompt có thể giúp ích gì?', ['Bảo đảm mọi câu trả lời đều đúng', 'Thay đổi trọng số mô hình', 'Làm rõ yêu cầu cần thực hiện', 'Loại bỏ nhu cầu về nhiệm vụ'], 2],
-            [6, 'Yêu cầu nào mô tả một nhiệm vụ cụ thể?', ['Hãy xử lý', 'Cho tôi kết quả', 'Làm điều phù hợp', 'Giải thích khái niệm token trong hai câu'], 3],
-            [2, 'Nếu đoạn truy xuất không liên quan, phần nào của RAG bị ảnh hưởng trực tiếp?', ['Ngữ cảnh cung cấp cho mô hình', 'Kích thước màn hình', 'Định dạng tên mô hình', 'Số trang của tài liệu gốc'], 0],
-            [2, 'Thông tin truy xuất được đưa vào đâu trước khi sinh câu trả lời?', ['Tên tệp đầu ra', 'Ngữ cảnh của mô hình', 'Bảng màu giao diện', 'Danh sách trọng số mới'], 1],
-            [7, 'RAG tìm thông tin liên quan từ đâu trong ví dụ bài học?', ['Các màu trên giao diện', 'Số thứ tự câu hỏi', 'Nguồn tài liệu', 'Tên người dùng'], 2],
-            [7, 'Sau bước truy xuất, mô hình làm gì trong RAG?', ['Xóa nguồn tài liệu', 'Bỏ qua ngữ cảnh', 'Huấn luyện lại từ đầu', 'Sinh câu trả lời với ngữ cảnh tìm được'], 3],
-            [3, 'Mô hình tự hồi quy sử dụng gì để dự đoán token tiếp theo?', ['Các token trong ngữ cảnh', 'Chỉ tên của tài liệu', 'Chỉ thời gian hiện tại', 'Chỉ số thứ tự trang'], 0],
-            [3, 'Sau khi sinh một token mới, mô hình thường làm gì?', ['Xóa mọi token cũ', 'Thêm token vào chuỗi để tiếp tục sinh', 'Kết thúc mọi câu trả lời', 'Đổi tokenizer ngay lập tức'], 1],
-            [5, 'Câu trả lời trôi chảy có bảo đảm thông tin chính xác không?', ['Có, trong mọi trường hợp', 'Có, khi câu trả lời dài', 'Không, vẫn cần đối chiếu nguồn', 'Không cần kiểm tra nếu có ví dụ'], 2],
-            [5, 'Đâu là căn cứ phù hợp khi duyệt nội dung do LLM sinh?', ['Giọng văn tự tin', 'Độ dài câu trả lời', 'Số lượng thuật ngữ', 'Nguồn tài liệu đáng tin cậy'], 3]
-        ];
         let questions = [], isGenerating = false, count = 6, level = 'Kết hợp', selectedTopics = new Set(), tab = 'all', toastTimer, generatedTopicCount = 0, targetCount = 6, generationLevel = 'Kết hợp', generationTopics = new Set();
-        let activeGraphId = null, skippedTopics = [];
+        let activeGraphId = null, generationGraphId = null, skippedTopics = [];
+        let mergedGraphs = [], selectedDocs = new Set(), docsTimer, merging = false;
         let addedFiles = [], editingId = null;
         const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         function showPath(kind, title, message, actions = []) { $('#path-panel').hidden = false; $('#path-panel').dataset.kind = kind; $('#path-label').textContent = { success: 'HAPPY PATH', low: 'LOW-CONFIDENCE · CHƯA ĐỦ CĂN CỨ', blocked: 'FAILURE · TỪ CHỐI AN TOÀN', failure: 'FAILURE · LỖI XỬ LÝ', correction: 'CORRECTION · NGƯỜI DÙNG SỬA' }[kind]; $('#path-title').textContent = title; $('#path-message').textContent = questions.length ? message : message.replaceAll('Bộ hiện tại được giữ nguyên.', 'Chưa có câu hỏi nào được tạo.').replaceAll('bộ hiện tại được giữ nguyên.', 'chưa có câu hỏi nào được tạo.').replaceAll('Cấu hình và bộ quiz hiện tại được giữ nguyên.', 'Cấu hình được giữ nguyên; chưa có câu hỏi nào được tạo.');['supported', 'upload'].forEach(a => $('#path-' + a).hidden = !actions.includes(a)) }
 
         const $ = s => document.querySelector(s); const icon = n => `<svg aria-hidden="true"><use href="#${n}"/></svg>`;
         function notify(t) { $('#toast').textContent = t; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').textContent = '', 3500) }
-        function render() { const hasQuiz = questions.length > 0; $('#initial-state').hidden = hasQuiz || isGenerating; $('#loading-state').hidden = !isGenerating;['.summary', '.mission', '#tabs', '#cards', '.bottom-info'].forEach(selector => $(selector).hidden = !hasQuiz || isGenerating); $('.results').setAttribute('aria-busy', String(isGenerating)); const counts = { pending: 0, approved: 0, rejected: 0 }; questions.forEach(q => counts[q.status]++); const active = questions.filter(q => q.status !== 'rejected'), missing = Math.max(0, targetCount - active.length); $('#total').textContent = active.length + ' / ' + targetCount; $('#refill-panel').hidden = !hasQuiz || isGenerating || missing === 0; $('#refill-title').textContent = 'Còn thiếu ' + missing + ' câu so với mục tiêu ' + targetCount + ' câu'; $('#refill-description').textContent = activeGraphId ? 'Giữ nguyên câu đã duyệt; AI sẽ sinh thêm câu mới từ knowledge graph theo cấu hình ban đầu.' : 'Chưa có tài liệu nào được phân tích.';         $('#refill').textContent = 'Bù ' + missing + ' câu hỏi'; $('#refill').disabled = !hasQuiz || isGenerating || missing === 0; $('#coverage').textContent = generatedTopicCount ? (() => { const wanted = Array.from(generationTopics).map(t => t.toLowerCase()); const hit = new Set(); active.forEach(q => { const t = (q.topic || '').toLowerCase(); wanted.forEach(w => { if (t === w || (w.length >= 4 && (t.includes(w) || w.includes(t))) || (t.length >= 4 && w.includes(t))) hit.add(w) }) }); return hit.size + ' / ' + generatedTopicCount })() : '—'; $('#approved').textContent = counts.approved + ' / ' + targetCount; $('#all-n').textContent = questions.length; Object.keys(counts).forEach(s => $('#' + s + '-n').textContent = counts[s]); $('#export').disabled = isGenerating || !counts.approved; const reviewed = counts.approved + counts.rejected, progress = questions.length ? Math.round(reviewed / questions.length * 100) : 0; $('#mission-count').textContent = reviewed + ' / ' + questions.length + ' hoàn tất'; $('#progress-fill').style.width = progress + '%'; $('#review-progress').setAttribute('aria-valuenow', progress); $('#mission-badge').textContent = progress === 100 ? 'Hoàn thành!' : progress > 0 ? 'Tiếp tục nào!' : 'Bắt đầu thôi!'; const visible = questions.filter(q => tab === 'all' || q.status === tab); $('#cards').innerHTML = visible.length ? visible.map(q => `<article class="card"><div class="card-top"><span class="number">Câu ${String(q.id + 1).padStart(2, '0')}</span><span class="badge">${q.topic}</span><span class="badge level">${q.level}</span><span class="state ${q.status}">${q.status === 'approved' ? '✓ Đã duyệt' : q.status === 'rejected' ? 'Đã loại' : '○ Chờ duyệt'}</span></div><div class="question">${escapeHTML(q.q)}</div>${q.edited ? '<div class="edited-label">Giảng viên đã sửa · cần đối chiếu nguồn</div>' : ''}<div class="answers">${q.a.map((a, i) => `<div class="answer ${i === q.correct ? 'selected' : ''} ${q.selected === i && i !== q.correct ? 'wrong' : ''}"><span class="letter">${'ABCD'[i]}</span>${escapeHTML(a)}${i === q.correct ? ' <span class="answer-key">✓</span>' : ''}</div>`).join('')}</div><div class="explanation show"><strong>Đáp án đúng: ${'ABCD'[q.correct]}.</strong> ${escapeHTML(q.explain)}</div><div class="card-bottom"><button class="source" data-source="${q.id}">${icon('link')} Slide ${q.page} <span>·</span> ${q.code} <span>↗</span></button><div class="actions">${q.status !== 'rejected' ? `<button data-edit="${q.id}">Sửa câu hỏi</button>` : ''}${q.status === 'pending' ? `<button data-status="${q.id},rejected">Loại câu hỏi</button><button class="approve" data-status="${q.id},approved">✓ &nbsp; Duyệt câu hỏi</button>` : `<button data-status="${q.id},pending">Hoàn tác</button>`}</div></div></article>`).join('') : '<div class="empty">Chưa có câu hỏi trong mục này.</div>' }
+        function render() { const hasQuiz = questions.length > 0; $('#initial-state').hidden = hasQuiz || isGenerating; $('#loading-state').hidden = !isGenerating;['.summary', '.mission', '#tabs', '#cards', '.bottom-info'].forEach(selector => $(selector).hidden = !hasQuiz || isGenerating); $('.results').setAttribute('aria-busy', String(isGenerating)); const counts = { pending: 0, approved: 0, rejected: 0 }; questions.forEach(q => counts[q.status]++); const active = questions.filter(q => q.status !== 'rejected'), missing = Math.max(0, targetCount - active.length); $('#total').textContent = active.length + ' / ' + targetCount; $('#refill-panel').hidden = !hasQuiz || isGenerating || missing === 0; $('#refill-title').textContent = 'Còn thiếu ' + missing + ' câu so với mục tiêu ' + targetCount + ' câu'; $('#refill-description').textContent = activeGraphId ? 'Giữ nguyên câu đã duyệt; AI sẽ sinh thêm câu mới từ knowledge graph theo cấu hình ban đầu.' : 'Chưa có tài liệu nào được phân tích.';         $('#refill').textContent = 'Bù ' + missing + ' câu hỏi'; $('#refill').disabled = !hasQuiz || isGenerating || missing === 0 || !generationGraphId; $('#coverage').textContent = generatedTopicCount ? (() => { const wanted = Array.from(generationTopics).map(t => t.toLowerCase()); const hit = new Set(); active.forEach(q => { const t = (q.topic || '').toLowerCase(); wanted.forEach(w => { if (t === w || (w.length >= 4 && (t.includes(w) || w.includes(t))) || (t.length >= 4 && w.includes(t))) hit.add(w) }) }); return hit.size + ' / ' + generatedTopicCount })() : '—'; $('#approved').textContent = counts.approved + ' / ' + targetCount; $('#all-n').textContent = questions.length; Object.keys(counts).forEach(s => $('#' + s + '-n').textContent = counts[s]); $('#export').disabled = isGenerating || !counts.approved; $('#play-quiz').disabled = isGenerating || !counts.approved; const reviewed = counts.approved + counts.rejected, progress = questions.length ? Math.round(reviewed / questions.length * 100) : 0; $('#mission-count').textContent = reviewed + ' / ' + questions.length + ' hoàn tất'; $('#progress-fill').style.width = progress + '%'; $('#review-progress').setAttribute('aria-valuenow', progress); $('#mission-badge').textContent = progress === 100 ? 'Hoàn thành!' : progress > 0 ? 'Tiếp tục nào!' : 'Bắt đầu thôi!'; const visible = questions.filter(q => tab === 'all' || q.status === tab); $('#cards').innerHTML = visible.length ? visible.map(q => `<article class="card"><div class="card-top"><span class="number">Câu ${String(q.id + 1).padStart(2, '0')}</span><span class="badge">${escapeHTML(q.topic)}</span><span class="badge level">${escapeHTML(q.level)}</span><span class="state ${q.status}">${q.status === 'approved' ? '✓ Đã duyệt' : q.status === 'rejected' ? 'Đã loại' : '○ Chờ duyệt'}</span></div><div class="question">${escapeHTML(q.q)}</div>${q.edited ? '<div class="edited-label">Giảng viên đã sửa · cần đối chiếu nguồn</div>' : ''}<div class="answers">${q.a.map((a, i) => `<div class="answer ${i === q.correct ? 'selected' : ''} ${q.selected === i && i !== q.correct ? 'wrong' : ''}"><span class="letter">${'ABCD'[i]}</span>${escapeHTML(a)}${i === q.correct ? ' <span class="answer-key">✓</span>' : ''}</div>`).join('')}</div><div class="explanation show"><strong>Đáp án đúng: ${'ABCD'[q.correct]}.</strong> ${escapeHTML(q.explain)}</div><div class="card-bottom"><button class="source" data-source="${q.id}">${icon('link')} ${escapeHTML(sourceLabel(q))} <span>↗</span></button><div class="actions">${q.status !== 'rejected' ? `<button data-edit="${q.id}">Sửa câu hỏi</button>` : ''}${q.status === 'pending' ? `<button data-status="${q.id},rejected">Loại câu hỏi</button><button class="approve" data-status="${q.id},approved">✓ &nbsp; Duyệt câu hỏi</button>` : `<button data-status="${q.id},pending">Hoàn tác</button>`}</div></div></article>`).join('') : '<div class="empty">Chưa có câu hỏi trong mục này.</div>' }
+        function getApprovedLiveQuiz() { return JSON.parse(JSON.stringify(questions.filter(q => q.status === 'approved'))); }
         function openSource(q) { $('#source-title').textContent = q.topic || 'Nguồn câu hỏi'; $('#slide-page').textContent = q.page ? ('SLIDE ' + q.page + (q.page_total ? ' / ' + q.page_total : '')) : 'SLIDE —'; $('#slide-title').textContent = q.title || '—'; $('#slide-text').textContent = (q.text || '').slice(0, 600); $('#transcript-code').textContent = 'Transcript · ' + (q.code || '—'); $('#transcript-text').textContent = '“' + (q.quote || q.text || '—') + '”'; $('#source-dialog').showModal() }
         $('#cards').addEventListener('click', e => { const edit = e.target.closest('[data-edit]'); if (edit) { openEditor(+edit.dataset.edit); return } const a = e.target.closest('[data-answer]'), s = e.target.closest('[data-status]'), src = e.target.closest('[data-source]'); if (a) { const [id, i] = a.dataset.answer.split(',').map(Number); questions[id].selected = i; render() } if (s) { const [id, status] = s.dataset.status.split(','); if (questions[id].status === 'rejected' && status === 'pending' && questions.filter(q => q.status !== 'rejected').length >= targetCount) { notify('Bộ quiz đã đủ câu. Hãy loại một câu khác trước khi khôi phục.'); return } questions[id].status = status; render() } if (src) openSource(questions[+src.dataset.source]) });
         $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x === b)); render() });
@@ -2406,66 +2400,189 @@
         $('#levels').onclick = e => { const b = e.target.closest('button'); if (!b) return; level = b.dataset.level; document.querySelectorAll('[data-level]').forEach(x => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', x === b) }) };
         function syncTopics() { document.querySelectorAll('[data-topic]').forEach(b => { const active = selectedTopics.has(b.dataset.topic); b.classList.toggle('active', active); b.setAttribute('aria-pressed', active); b.textContent = (active ? '✓  ' : '') + b.dataset.topic }) }
         $('#topics').onclick = e => { const b = e.target.closest('button'); if (!b || !b.dataset.topic) return; const t = b.dataset.topic; if (selectedTopics.has(t)) selectedTopics.delete(t); else selectedTopics.add(t); $('#scope').value = 'custom'; const on = selectedTopics.has(t); b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); b.textContent = (on ? '✓  ' : '') + t + ' (' + (b.dataset.src || '?') + ' nguồn)' }; $('#scope').onchange = () => { if ($('#scope').value === 'all') { selectedTopics = new Set(); document.querySelectorAll('[data-topic]').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); b.textContent = b.dataset.topic + ' (' + (b.dataset.src || '?') + ' nguồn)' }); } };
-        function generateQuiz() { if (!selectedTopics.size) { notify('Chọn ít nhất một chủ đề để tạo quiz.'); return } return true }
-
-        $('#generate').onclick = () => {
-            if (isGenerating) return;
-            const scopeAll = $('#scope').value === 'all';
-            if (!scopeAll && !selectedTopics.size) { notify('Chọn ít nhất một chủ đề, hoặc đổi phạm vi thành "Tất cả chủ đề".'); return }
-            if (!activeGraphId) { notify('Chưa có tài liệu nào được phân tích. Hãy upload PDF/MD trước.'); return }
-            isGenerating = true; $('#path-panel').hidden = true;
-            const controls = Array.from(document.querySelectorAll('.builder button,.builder select,.results button'));
-            const previousStates = controls.map(control => [control, control.disabled]);
-            controls.forEach(control => control.disabled = true);
-            $('#generate').textContent = 'AI đang phân tích graph & sinh câu hỏi…'; render();
-            if (innerWidth < 701) $('.results').scrollIntoView({ behavior: 'smooth' });
-            // đồng hồ + timeout: không bao giờ loading vô hạn nữa
-            const t0 = Date.now();
-            const elapsedTimer = setInterval(() => { const el = $('#loading-elapsed'); if (el) el.textContent = Math.round((Date.now() - t0) / 1000) + 's' }, 500);
-            const abort = new AbortController();
-            const timeoutId = setTimeout(() => abort.abort(), 75000);
-            fetch('/api/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph_id: activeGraphId, count: count, level: level, topics: scopeAll ? [] : Array.from(selectedTopics), seed: Math.floor(Math.random() * 10000) }), signal: abort.signal })
-                .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.detail || 'Lỗi API') }); return r.json() })
-                .then(data => {
-                    questions = data.questions.map((q, i) => ({ ...q, id: i, status: 'pending', selected: null, bankKey: q.q }));
-                    targetCount = count; generationLevel = level; generationTopics = new Set(selectedTopics); generatedTopicCount = selectedTopics.size;
-                    skippedTopics = data.skipped || [];
-                    const note = $('#evidence-note');
-                    note.innerHTML = 'Pool đủ căn cứ: <b>' + data.n_pool + ' concept</b>' + (skippedTopics.length ? '<br>AI bỏ qua ' + skippedTopics.length + ' concept thiếu bằng chứng: ' + skippedTopics.slice(0, 5).join(', ') + (skippedTopics.length > 5 ? '…' : '') : '');
-                    tab = 'all'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === 'all'));
-                    $('#result-description').textContent = 'Vừa tạo · ' + questions.length + ' câu hỏi · ' + level;
-                    render();
-                    showPath('success', 'Bộ quiz đã sẵn sàng để duyệt', questions.length + ' câu được AI sinh từ knowledge graph (' + data.n_pool + ' concept đủ căn cứ, bốc theo seed ngẫu nhiên). Mỗi câu có trang slide/mã đoạn nguồn — Hãy kiểm tra trước khi xuất.');
-                    notify('Đã tạo ' + questions.length + '/' + count + ' câu từ graph thật.');
-                    if (innerWidth < 701) $('.results').scrollIntoView({ behavior: 'smooth' });
-                })
-                .catch(error => { const msg = error.name === 'AbortError' ? 'Quá 75 giây không có phản hồi — có thể backend đã tắt hoặc mạng tới OpenAI bị gián đoạn.' : String(error.message || error); showPath('failure', 'Không thể tạo bộ quiz', msg + ' Kiểm tra: (1) terminal uvicorn còn chạy không, (2) F12 → Network xem request /api/quiz có gửi đi không.') })
-                .finally(() => { clearTimeout(timeoutId); clearInterval(elapsedTimer); isGenerating = false; previousStates.forEach(([control, disabled]) => control.disabled = disabled); $('#generate').textContent = 'Tạo thử thách →'; render() });
+        function sourceLabel(q) {
+            return [q.source_file, q.page ? 'Trang ' + q.page : '', q.code && q.code !== '—' ? 'Đoạn ' + q.code : ''].filter(Boolean).join(' · ');
+        }
+        async function api(path, options = {}) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 150000);
+            try {
+                const response = await fetch(path, {...options, signal: controller.signal});
+                const data = await response.json();
+                if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : data.error || 'Yêu cầu không hợp lệ.');
+                return data;
+            } catch (error) {
+                if (error.name === 'AbortError') throw new Error('Quá thời gian chờ phản hồi. Hãy thử lại.');
+                throw error;
+            } finally { clearTimeout(timeout); }
+        }
+        function post(path, data) {
+            return api(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+        }
+        async function generateQuiz(refill = false) {
+            if (isGenerating || merging) return;
+            const graph = refill ? generationGraphId : activeGraphId;
+            const topics = refill ? [...generationTopics] : ($('#scope').value === 'all' ? [] : [...selectedTopics]);
+            const requested = refill ? Math.max(0, targetCount - questions.filter(q => q.status !== 'rejected').length) : count;
+            const difficulty = refill ? generationLevel : level;
+            if (!graph) { notify('Hãy tải và chọn tài liệu đã phân tích.'); return; }
+            if (!refill && $('#scope').value !== 'all' && !topics.length) { notify('Chọn ít nhất một chủ đề.'); return; }
+            if (!requested) return;
+            isGenerating = true;
+            $('#path-panel').hidden = true;
+            $('#generate').disabled = true;
+            $('#generate').textContent = 'Đang tạo câu hỏi…';
+            render();
+            try {
+                const data = await post('/api/quiz', {graph_id: graph, count: requested, level: difficulty, topics,
+                    seed: Math.floor(Math.random() * 1000000),
+                    existing_questions: refill ? questions.map(q => ({concept_id: q.concept_id, q: q.q,
+                        a: q.a, correct: q.correct, status: q.status, original_q: q.bankKey || q.q})) : []});
+                if (!Array.isArray(data.questions)) throw new Error('Phản hồi API không hợp lệ.');
+                if (!data.questions.length) {
+                    showPath('low', 'Chưa tạo được câu hỏi mới', (data.message || 'Chưa đủ nội dung phù hợp.') + ' Bộ hiện tại được giữ nguyên.');
+                    return;
+                }
+                if (refill) {
+                    const used = new Set(questions.map(q => q.bankKey || q.q));
+                    const fresh = data.questions.filter(q => !used.has(q.q)).slice(0, requested);
+                    fresh.forEach(q => questions.push({...q, id: questions.length, status: 'pending', selected: null, bankKey: q.q}));
+                    tab = 'pending';
+                    showPath(fresh.length < requested ? 'low' : 'success', 'Đã bù ' + fresh.length + '/' + requested + ' câu',
+                        (data.message || '') + ' Giữ nguyên câu đã duyệt. Câu bổ sung cần được duyệt trước khi xuất hoặc chơi.');
+                } else {
+                    questions = data.questions.map((q, id) => ({...q, id, status: 'pending', selected: null, bankKey: q.q}));
+                    targetCount = requested; generationLevel = difficulty; generationTopics = new Set(topics);
+                    generationGraphId = graph; generatedTopicCount = topics.length; tab = 'all';
+                    $('#result-description').textContent = 'Vừa tạo · ' + questions.length + ' câu · ' + difficulty;
+                    showPath(questions.length < requested ? 'low' : 'success', 'Đã tạo ' + questions.length + '/' + requested + ' câu',
+                        (data.message || '') + ' Câu hỏi có đáp án và bằng chứng từ tài liệu. Hãy kiểm tra, sửa hoặc loại trước khi duyệt.');
+                }
+                document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+            } catch (error) {
+                showPath('failure', refill ? 'Không thể bù câu hỏi' : 'Không thể tạo quiz', error.message + ' Bộ hiện tại được giữ nguyên.');
+            } finally {
+                isGenerating = false; $('#generate').disabled = false; $('#generate').textContent = 'Tạo thử thách →'; render();
+            }
+        }
+        $('#generate').onclick = () => generateQuiz();
+        $('#refill').onclick = () => generateQuiz(true);
+        $('#export').onclick = () => {
+            const approved = getApprovedLiveQuiz();
+            if (!approved.length) return;
+            const blob = new Blob([JSON.stringify({title: 'Quiz bài giảng', demo: false, graph_id: generationGraphId,
+                questions: approved.map(q => ({question: q.q, options: q.a, correctAnswer: q.a[q.correct],
+                    topic: q.topic, difficulty: q.level, source: {file: q.source_file, doc_id: q.source_doc_id,
+                    slide: q.page, transcript: q.code, quote: q.quote}, explanation: q.explain}))}, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob), link = document.createElement('a');
+            link.href = url; link.download = 'lessonleaf-quiz.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+            notify('Đã xuất ' + approved.length + ' câu đã duyệt.');
         };
-
-        $('#export').onclick = () => { const approved = questions.filter(q => q.status === 'approved'); if (!approved.length) return; const blob = new Blob([JSON.stringify({ title: 'Khám phá mô hình ngôn ngữ', demo: true, questions: approved.map(q => ({ question: q.q, options: q.a, correctAnswer: q.a[q.correct], topic: q.topic, difficulty: q.level, source: { slide: q.page, transcript: q.code }, explanation: q.explain })) }, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'lessonleaf-quiz.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); notify('Đã xuất ' + approved.length + ' câu hỏi đã duyệt.') };
-
-        $('#refill').onclick = () => { if (!activeGraphId || isGenerating) return; const missing = Math.max(0, targetCount - questions.filter(q => q.status !== 'rejected').length); if (!missing) { notify('Bộ quiz đã đủ câu.'); return } isGenerating = true; render(); fetch('/api/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph_id: activeGraphId, count: missing, level: generationLevel, topics: Array.from(generationTopics), seed: Math.floor(Math.random() * 10000) }) }).then(r => r.json()).then(data => { const used = new Set(questions.map(q => q.bankKey || q.q)); const fresh = data.questions.filter(q => !used.has(q.q)); fresh.forEach(q => questions.push({ ...q, id: questions.length, status: 'pending', selected: null, bankKey: q.q })); tab = 'pending'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab)); render(); showPath('success', 'Đã xử lý yêu cầu bù câu hỏi', 'AI đã sinh thêm ' + fresh.length + ' câu mới từ knowledge graph; các câu bổ sung đang chờ duyệt.'); notify('Đã thêm ' + fresh.length + ' câu.') }).catch(() => notify('Không bù được câu hỏi — thử lại.')).finally(() => { isGenerating = false; render() }) };
-        function renderFiles() { const list = $('#added-files'); list.replaceChildren(); addedFiles.forEach((f, index) => { const row = document.createElement('div'); row.className = 'file'; const type = document.createElement('span'); type.className = 'file-icon txt'; type.textContent = f.name.split('.').pop().toUpperCase(); const details = document.createElement('div'); details.className = 'file-details'; const name = document.createElement('strong'); name.textContent = f.name; const meta = document.createElement('small'); meta.textContent = f._status === 'ready' ? ((f._n_nodes || '?') + ' concepts · ' + (f._cached ? 'cache (0 API)' : 'AI đã phân tích')) : (f._status === 'processing' ? 'AI đang phân tích graph… ' + (f._progress ? f._progress + '/' + (f._total || '?') + ' chunks' : '') : (f._status === 'error' ? ('Lỗi: ' + (f._error || '')) : 'Đang gửi…')); const remove = document.createElement('button'); remove.className = 'remove-file'; remove.textContent = '×'; remove.setAttribute('aria-label', 'Xóa ' + f.name); remove.onclick = () => { const wasActive = f._doc_id && f._doc_id === activeGraphId; if (f._doc_id) fetch('/api/doc/' + f._doc_id, { method: 'DELETE' }); addedFiles.splice(index, 1); renderFiles(); if (wasActive) { activeGraphId = null; selectedTopics.clear(); $('#topics').replaceChildren(); const ready = addedFiles.find(x => x._status === 'ready'); if (ready) { activeGraphId = ready._doc_id; } refreshDocs(); notify('Đã xóa tài liệu (kèm graph của nó).' + (activeGraphId ? ' Chuyển sang nguồn: ' + addedFiles.find(x => x._doc_id === activeGraphId).name : '')) } };; details.append(name, meta); row.append(type, details, remove); list.append(row) }) }
+        function renderFiles() {
+            const list = $('#added-files'); list.replaceChildren();
+            for (const file of addedFiles) {
+                const row = document.createElement('div'); row.className = 'file';
+                const check = document.createElement('input'); check.type = 'checkbox';
+                check.checked = selectedDocs.has(file.doc_id); check.disabled = file.status !== 'ready' || merging;
+                check.setAttribute('aria-label', 'Chọn ghép ' + file.name);
+                check.onchange = () => { check.checked ? selectedDocs.add(file.doc_id) : selectedDocs.delete(file.doc_id); renderFiles(); };
+                const details = document.createElement('div'); details.className = 'file-details';
+                const name = document.createElement('strong'); name.textContent = file.name;
+                const meta = document.createElement('small');
+                meta.textContent = file.status === 'ready' ? file.n_nodes + ' khái niệm' + (file.from_cache ? ' · từ cache' : '') :
+                    file.status === 'error' ? 'Lỗi: ' + (file.error || 'Hãy tải lại tệp.') : 'Đang phân tích… ' + (file.progress || 0) + '/' + (file.total || '?');
+                const remove = document.createElement('button'); remove.className = 'remove-file'; remove.textContent = '×';
+                remove.disabled = file.status === 'processing' || merging;
+                remove.setAttribute('aria-label', 'Xóa ' + file.name);
+                remove.onclick = async () => {
+                    remove.disabled = true;
+                    try { await api('/api/doc/' + file.doc_id, {method: 'DELETE'}); selectedDocs.delete(file.doc_id); await refreshDocs(); }
+                    catch (error) { notify(error.message); remove.disabled = false; }
+                };
+                details.append(name, meta); row.append(check, details, remove); list.append(row);
+            }
+            $('#merge-docs').disabled = merging || isGenerating || selectedDocs.size < 2 || selectedDocs.size > 3;
+        }
+        function renderGraphOptions() {
+            const select = $('#graph-select'); select.replaceChildren();
+            const choices = [...addedFiles.filter(d => d.status === 'ready').map(d => ({id: d.doc_id, name: d.name})),
+                ...mergedGraphs.filter(m => !m.stale).map(m => ({id: m.merge_id, name: 'Ghép · ' + m.doc_ids.map(id => addedFiles.find(d => d.doc_id === id)?.name || id).join(' + ')}))];
+            if (!choices.some(c => c.id === activeGraphId)) activeGraphId = choices[0]?.id || null;
+            for (const choice of choices.length ? choices : [{id: '', name: 'Chưa có tài liệu sẵn sàng'}]) {
+                const option = document.createElement('option'); option.value = choice.id; option.textContent = choice.name; select.append(option);
+            }
+            select.value = activeGraphId || '';
+        }
+        async function refreshDocs() {
+            clearTimeout(docsTimer);
+            try {
+                const [docs, merges] = await Promise.all([api('/api/docs'), api('/api/merges')]);
+                const previous = activeGraphId;
+                addedFiles = docs; mergedGraphs = merges;
+                selectedDocs = new Set([...selectedDocs].filter(id => docs.some(d => d.doc_id === id && d.status === 'ready')));
+                renderFiles(); renderGraphOptions();
+                $('#doc-error').textContent = '';
+                if (previous !== activeGraphId || !$('#topics').children.length) await refreshTopics();
+            } catch (error) { $('#doc-error').textContent = 'Không tải được tài liệu: ' + error.message; }
+            finally { docsTimer = setTimeout(refreshDocs, 3000); }
+        }
+        async function refreshTopics() {
+            const graph = activeGraphId;
+            selectedTopics.clear(); $('#scope').value = 'all'; $('#topics').replaceChildren();
+            if (!graph) {
+                $('#kg-badge').textContent = 'Chưa có knowledge graph';
+                $('#evidence-note').textContent = 'Thêm PDF, MD hoặc TXT để bắt đầu.'; return;
+            }
+            try {
+                const g = await api('/api/graph/' + graph);
+                if (activeGraphId !== graph) return;
+                const concepts = g.nodes.filter(n => n.type === 'concept' && n.quotes?.length && n.sources?.length);
+                for (const n of concepts) {
+                    const button = document.createElement('button'); button.className = 'topic';
+                    button.dataset.topic = n.name; button.dataset.src = n.sources.length;
+                    button.textContent = n.name + ' (' + n.sources.length + ' nguồn)'; button.setAttribute('aria-pressed', 'false'); $('#topics').append(button);
+                }
+                $('#kg-badge').textContent = 'Knowledge Graph · ' + g.nodes.length + ' khái niệm / ' + g.edges.length + ' quan hệ';
+                $('#evidence-note').textContent = concepts.length + ' khái niệm có bằng chứng để sinh quiz.';
+            } catch (error) { $('#evidence-note').textContent = error.message; }
+        }
+        $('#graph-select').onchange = () => { activeGraphId = $('#graph-select').value || null; refreshTopics(); };
+        $('#merge-docs').onclick = async () => {
+            if (merging || isGenerating || selectedDocs.size < 2 || selectedDocs.size > 3) return;
+            merging = true; renderFiles(); $('#merge-docs').textContent = 'Đang ghép tài liệu…';
+            try {
+                const result = await post('/api/merge', {doc_ids: [...selectedDocs]});
+                activeGraphId = result.merge_id; await refreshDocs(); await refreshTopics();
+                notify('Đã ghép graph: ' + result.report.n_before + ' → ' + result.report.n_after + ' khái niệm.');
+            } catch (error) { notify(error.message); }
+            finally { merging = false; $('#merge-docs').textContent = 'Ghép 2–3 tài liệu đã chọn'; renderFiles(); }
+        };
         $('#add-files').onclick = () => $('#file-input').click();
-        function addFiles(files) { let added = 0, invalid = 0, duplicate = 0; for (const file of files) { if (!/\.(pdf|md|txt)$/i.test(file.name) || file.size > 20 * 1024 * 1024) { invalid++; continue } if (addedFiles.some(f => f.name === file.name && f.size === file.size)) { duplicate++; continue } addedFiles.push(file); added++; const fd = new FormData(); fd.append('file', file); fetch('/api/upload', { method: 'POST', body: fd }).then(r => r.json()).then(d => { file._doc_id = d.doc_id; file._status = 'processing'; renderFiles(); pollDoc(file, d.doc_id) }).catch(e => { file._status = 'error'; file._error = 'Không gửi được tới server'; renderFiles() }) } renderFiles(); notify([added ? 'Đã thêm ' + added + ' tài liệu — AI bắt đầu phân tích.' : '', invalid ? invalid + ' tệp sai định dạng hoặc vượt 20 MB.' : '', duplicate ? duplicate + ' tệp đã có trong danh sách.' : ''].filter(Boolean).join(' ') || 'Chưa chọn tài liệu.') }
-        function pollDoc(file, docId) { const timer = setInterval(() => { fetch('/api/docs').then(r => r.json()).then(docs => { const d = docs.find(x => x.doc_id === docId); if (!d) return; file._status = d.status; file._progress = d.progress; file._total = d.total; file._error = d.error; file._n_nodes = d.n_nodes; file._cached = d.from_cache; renderFiles(); if (d.status === 'ready') { clearInterval(timer); activeGraphId = docId; refreshTopics(); if (innerWidth < 701) {} notify('"' + file.name + '" đã sẵn sàng — graph ' + d.n_nodes + ' concepts. Đã chọn làm nguồn quiz.') } if (d.status === 'error') { clearInterval(timer); renderFiles() } }) }, 1500) }
-        function refreshDocs() { fetch('/api/docs').then(r => r.json()).then(docs => { addedFiles = docs.map(d => ({ name: d.name, size: 0, _doc_id: d.doc_id, _status: d.status, _progress: d.progress, _total: d.total, _error: d.error, _n_nodes: d.n_nodes, _cached: d.from_cache })); const ready = addedFiles.find(f => f._status === 'ready'); if (ready && !activeGraphId) activeGraphId = ready._doc_id; renderFiles(); refreshTopics() }) }
-        async function refreshTopics() { if (!activeGraphId) return; try { const g = await fetch('/api/graph/' + activeGraphId).then(r => r.json()); const concepts = g.nodes.filter(n => n.type === 'concept' && (n.quotes || []).length > 0); const top = concepts.sort((a, b) => (b.sources || []).length - (a.sources || []).length).slice(0, 10); const box = $('#topics'); box.replaceChildren(); top.forEach(n => { const b = document.createElement('button'); b.className = 'topic'; b.dataset.topic = n.name; b.dataset.src = (n.sources || []).length; b.textContent = n.name + ' (' + (n.sources || []).length + ' nguồn)'; box.append(b) }); $('#kg-badge').innerHTML = '<span class="dot"></span>Knowledge Graph · ' + g.nodes.length + ' nodes / ' + g.edges.length + ' cạnh'; const note = $('#evidence-note'); note.innerHTML = 'Pool đủ căn cứ: <b>' + concepts.length + ' concept</b> (có quote + nguồn). AI chỉ sinh câu hỏi từ các concept này.'; } catch (e) {} }
+        async function addFiles(files) {
+            for (const file of files) {
+                if (!/\.(pdf|md|txt)$/i.test(file.name) || !file.size || file.size > 20 * 1024 * 1024) {
+                    notify(file.name + ': cần PDF/MD/TXT, không rỗng và tối đa 20 MB.'); continue;
+                }
+                const body = new FormData(); body.append('file', file);
+                try { await api('/api/upload', {method: 'POST', body}); await refreshDocs(); }
+                catch (error) { notify(file.name + ': ' + error.message); }
+            }
+        }
         $('#file-input').onchange = e => { addFiles(Array.from(e.target.files)); e.target.value = '' };
 
 
-        function openEditor(id) { const q = questions[id]; editingId = id; $('#edit-question').value = q.q; q.a.forEach((a, i) => $('#edit-option-' + i).value = a); $('#edit-correct').value = String(q.correct); $('#edit-explanation').value = q.explain; $('#edit-source').textContent = 'Nguồn giữ nguyên: Slide ' + q.page + ' · ' + q.code; $('#edit-error').textContent = ''; $('#edit-dialog').showModal() }
+        function openEditor(id) { const q = questions[id]; editingId = id; $('#edit-question').value = q.q; q.a.forEach((a, i) => $('#edit-option-' + i).value = a); $('#edit-correct').value = String(q.correct); $('#edit-explanation').value = q.explain; $('#edit-source').textContent = 'Nguồn giữ nguyên: ' + sourceLabel(q); $('#edit-error').textContent = ''; $('#edit-dialog').showModal() }
         function closeEditor() { $('#edit-dialog').close(); editingId = null }
         $('#edit-close').onclick = closeEditor; $('#edit-cancel').onclick = closeEditor;
         $('#edit-form').onsubmit = e => { e.preventDefault(); if (editingId === null) return; const text = $('#edit-question').value.trim(), options = [0, 1, 2, 3].map(i => $('#edit-option-' + i).value.trim()), explanation = $('#edit-explanation').value.trim(), correct = Number($('#edit-correct').value); if (!text || options.some(a => !a) || !explanation) { $('#edit-error').textContent = 'Vui lòng điền câu hỏi, đủ 4 phương án và giải thích.'; return } if (new Set(options.map(a => a.toLocaleLowerCase('vi'))).size !== 4) { $('#edit-error').textContent = 'Bốn phương án phải khác nhau.'; return } if (!Number.isInteger(correct) || correct < 0 || correct > 3) { $('#edit-error').textContent = 'Chọn một đáp án đúng từ A đến D.'; return } const q = questions[editingId]; q.q = text; q.a = options; q.correct = correct; q.explain = explanation; q.edited = true; q.status = 'pending'; q.selected = null; closeEditor(); tab = 'pending'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab)); render(); showPath('correction', 'Đã lưu chỉnh sửa — cần duyệt lại', 'Câu hỏi đã trở về Chờ duyệt và không được xuất cho đến khi giảng viên duyệt lại. Nguồn tham chiếu được giữ nguyên; nội dung sửa chưa được tự động xác minh.'); };
-        $('#path-supported').onclick = () => { const ready = addedFiles.filter(f => f._status === 'ready'); if (!ready.length) { notify('Chưa có tài liệu nào được phân tích.'); return } activeGraphId = ready[0]._doc_id; refreshTopics(); showPath('success', 'Đã chuyển về graph tài liệu thật', 'Bấm Tạo thử thách để tạo bộ quiz mới từ knowledge graph của tài liệu này.') };
+        $('#path-supported').onclick = () => { $('#scope').value = 'all'; selectedTopics.clear(); syncTopics(); };
         $('#path-upload').onclick = () => $('#file-input').click();
 
         $('#source-dialog .close').onclick = () => $('#source-dialog').close(); $('#source-dialog').onclick = e => { if (e.target === $('#source-dialog')) { const r = e.target.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) e.target.close() } };
         // Khởi động: nạp docs đã phân tích từ server (cache giữ nguyên giữa các phiên)
         refreshDocs(); render();
     </script>
+    <script src="live.js"></script>
 </body>
 
 </html>
