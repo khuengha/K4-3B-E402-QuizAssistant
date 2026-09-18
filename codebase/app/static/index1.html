@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lessonleaf · Không gian tạo quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Lexend:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f8f5;
+            --paper: #fff;
+            --ink: #243d36;
+            --muted: #839089;
+            --green: #306c54;
+            --light: #edf4ee;
+            --line: #e5eae4;
+            --orange: #aa774a
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Plus Jakarta Sans', 'Lexend', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            font: inherit
+        }
+
+        button {
+            cursor: pointer;
+            transition: .18s
+        }
+
+        button:hover {
+            filter: brightness(.96);
+            transform: translateY(-1px)
+        }
+
+        button:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #91baa3;
+            outline-offset: 3px
+        }
+
+        button {
+            color: inherit
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle
+        }
+
+        .top {
+            height: 82px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+            padding: 0 42px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 750;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .logo {
+            background: var(--green);
+            color: white;
+            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center
+        }
+
+        .brand small {
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 500;
+            display: block;
+            color: var(--muted);
+            margin-top: -6px
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+            height: 100%;
+            align-items: center
+        }
+
+        .nav span {
+            color: var(--muted)
+        }
+
+        .nav strong {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            border-bottom: 3px solid var(--green);
+            font-weight: 600
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px
+        }
+
+        .avatar {
+            border: 4px solid #f5f5ed;
+            background: #e9e9d7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            font-weight: 700
+        }
+
+        .sub {
+            display: block;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .workspace {
+            max-width: 1510px;
+            margin: auto;
+            padding: 30px 42px 48px
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 20px
+        }
+
+        .breadcrumb b {
+            color: var(--green);
+            font-weight: 500
+        }
+
+        .intro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px
+        }
+
+        h1 {
+            font-size: 29px;
+            letter-spacing: normal;
+            font-weight: 700;
+            margin: 0 0 6px
+        }
+
+        p {
+            margin: 0
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .demo {
+            font-size: 11px;
+            border: 1px solid #dedfce;
+            background: #f3f3e7;
+            border-radius: 8px;
+            padding: 7px 11px;
+            color: #85836a
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 330px minmax(0, 1fr);
+            gap: 28px;
+            align-items: start
+        }
+
+        .builder {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden
+        }
+
+        .builder-head {
+            padding: 23px 24px 18px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        h2 {
+            font-size: 17px;
+            margin: 0 0 4px;
+            letter-spacing: normal
+        }
+
+        .section {
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .section-title {
+            display: flex;
+            gap: 9px;
+            align-items: center;
+            font-weight: 650;
+            font-size: 13px;
+            margin-bottom: 16px
+        }
+
+        .step {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            width: 23px;
+            height: 23px;
+            text-align: center;
+            font-size: 11px;
+            line-height: 21px;
+            color: #71927e
+        }
+
+        .file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f9faf7;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 11px;
+            margin: 9px 0
+        }
+
+        .file-icon {
+            font-size: 9px;
+            font-weight: 750;
+            letter-spacing: .4px;
+            color: #ae7957;
+            background: #f7eadd;
+            padding: 10px 6px;
+            border-radius: 6px
+        }
+
+        .file-icon.txt {
+            background: #e9efea;
+            color: #6c8b77
+        }
+
+        .file strong {
+            font-size: 11px;
+            display: block
+        }
+
+        .file small {
+            font-size: 10px;
+            color: var(--muted)
+        }
+
+        .file .tick {
+            margin-left: auto;
+            color: #67947b;
+            font-size: 13px
+        }
+
+        .upload {
+            border: 1px dashed #bdcfbf;
+            background: white;
+            padding: 10px;
+            width: 100%;
+            border-radius: 9px;
+            color: var(--green);
+            font-size: 12px;
+            margin-top: 4px
+        }
+
+        .graph {
+            margin-top: 13px;
+            font-size: 10px;
+            color: #789282;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #6a9b7c;
+            display: inline-block
+        }
+
+        label.field {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 9px;
+            font-weight: 550
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 17px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 3px
+        }
+
+        .counter button {
+            border: 0;
+            background: #f6f7f3;
+            width: 26px;
+            height: 26px;
+            border-radius: 5px
+        }
+
+        .counter output {
+            font-weight: 600;
+            font-size: 12px
+        }
+
+        select {
+            width: 100%;
+            border: 1px solid var(--line);
+            padding: 10px;
+            border-radius: 8px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 12px;
+            margin-bottom: 18px
+        }
+
+        .seg {
+            display: flex;
+            gap: 5px;
+            margin: 9px 0 20px
+        }
+
+        .seg button {
+            flex: 1;
+            padding: 8px 2px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: white;
+            font-size: 11px
+        }
+
+        .seg button.active {
+            background: var(--light);
+            border-color: #9fbea8;
+            color: var(--green)
+        }
+
+        .topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px
+        }
+
+        .topic {
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 6px 10px;
+            background: white;
+            font-size: 11px
+        }
+
+        .topic.active {
+            background: var(--light);
+            border-color: #afc8b8;
+            color: var(--green)
+        }
+
+        .note {
+            background: #f5f7f0;
+            border-radius: 9px;
+            font-size: 11px;
+            color: #829079;
+            padding: 12px;
+            display: flex;
+            gap: 9px;
+            margin-bottom: 15px
+        }
+
+        .primary {
+            border: 0;
+            border-radius: 9px;
+            background: var(--green);
+            color: #fff;
+            padding: 11px 17px;
+            font-weight: 550;
+            font-size: 12px
+        }
+
+        .generate {
+            width: 100%
+        }
+
+        .builder-foot {
+            padding: 20px 24px
+        }
+
+        .footnote {
+            text-align: center;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 10px
+        }
+
+        .result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 17px
+        }
+
+        .kicker {
+            font-size: 10px;
+            letter-spacing: 1.6px;
+            color: #829488;
+            font-weight: 600;
+            margin-bottom: 5px
+        }
+
+        .result-head h2 {
+            font-size: 23px
+        }
+
+        .outline {
+            border: 1px solid #d6e1d8;
+            background: #fff;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 11px;
+            display: flex;
+            gap: 7px;
+            align-items: center
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 21px
+        }
+
+        .stat {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 15px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            background: #eff3ed;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            color: #70917b
+        }
+
+        .stat:nth-child(2) .stat-icon {
+            background: #f8f0e5;
+            color: #b39465
+        }
+
+        .stat strong {
+            font-size: 20px;
+            line-height: 1.1
+        }
+
+        .stat span.sub {
+            font-size: 10px;
+            margin-top: 4px
+        }
+
+        .tabs {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #dde5dc;
+            gap: 22px;
+            margin-bottom: 18px
+        }
+
+        .tabs button {
+            border: 0;
+            background: none;
+            padding: 0 0 12px;
+            font-size: 12px;
+            color: var(--muted);
+            border-bottom: 2px solid transparent
+        }
+
+        .tabs button.active {
+            color: var(--green);
+            border-color: var(--green);
+            font-weight: 600
+        }
+
+        .tabs small {
+            font-size: 10px;
+            background: #e9eee7;
+            border-radius: 4px;
+            padding: 2px 5px;
+            margin-left: 5px
+        }
+
+        .review-hint {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 10px;
+            margin-bottom: 12px
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 21px 24px;
+            margin-bottom: 15px
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 13px
+        }
+
+        .number {
+            font-size: 11px;
+            font-weight: 650;
+            margin-right: 5px
+        }
+
+        .badge {
+            font-size: 9px;
+            border-radius: 5px;
+            padding: 3px 8px;
+            background: #eef3ee;
+            color: #62856d
+        }
+
+        .badge.level {
+            background: #f7f0e4;
+            color: #a58957
+        }
+
+        .state {
+            margin-left: auto;
+            font-size: 10px;
+            color: #a79777;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .state.approved {
+            color: var(--green)
+        }
+
+        .question {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px
+        }
+
+        .answer {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-align: left;
+            background: #fff;
+            border: 1px solid var(--line);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            min-height: 44px
+        }
+
+        .letter {
+            border: 1px solid #dfe5df;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-size: 10px;
+            color: #8b968d
+        }
+
+        .answer.selected {
+            border-color: #9cbfa8;
+            background: #f0f6f0
+        }
+
+        .answer.selected .letter {
+            background: #649176;
+            border-color: #649176;
+            color: white
+        }
+
+        .answer.wrong {
+            background: #fcf1ed;
+            border-color: #d9a796
+        }
+
+        .explanation {
+            font-size: 11px;
+            color: #708979;
+            padding-top: 12px;
+            display: none
+        }
+
+        .explanation.show {
+            display: block
+        }
+
+        .card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-top: 1px solid #eef1eb;
+            margin-top: 17px;
+            padding-top: 12px
+        }
+
+        .source {
+            border: 0;
+            background: none;
+            color: #88958a;
+            font-size: 10px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .source svg {
+            width: 13px;
+            height: 13px
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px
+        }
+
+        .actions button {
+            border: 1px solid var(--line);
+            background: white;
+            font-size: 10px;
+            padding: 6px 10px;
+            border-radius: 6px
+        }
+
+        .actions button.approve {
+            background: #edf4ee;
+            border-color: #dce8dd;
+            color: var(--green)
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            border: 1px dashed #cbd7cc;
+            border-radius: 14px
+        }
+
+        .bottom-info {
+            display: flex;
+            justify-content: space-between;
+            color: #929c92;
+            font-size: 10px;
+            padding: 8px 2px
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #294f3f;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 10px;
+            box-shadow: 0 8px 35px #294f3f25;
+            z-index: 10;
+            font-size: 13px
+        }
+
+        .toast:empty {
+            display: none
+        }
+
+        dialog {
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            width: 640px;
+            max-width: 92vw;
+            padding: 27px;
+            color: var(--ink);
+            box-shadow: 0 20px 80px #162c3030
+        }
+
+        dialog::backdrop {
+            background: #20362b66;
+            backdrop-filter: blur(4px)
+        }
+
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px
+        }
+
+        .close {
+            background: #eff3ee;
+            border: 0;
+            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            font-size: 20px
+        }
+
+        .slide {
+            background: #f3f5eb;
+            border-radius: 12px;
+            padding: 35px;
+            margin: 15px 0;
+            min-height: 220px;
+            border-left: 5px solid #8ba48c
+        }
+
+        .slide h3 {
+            font-size: 26px;
+            margin: 10px 0
+        }
+
+        .slide p {
+            font-size: 14px;
+            line-height: 1.9
+        }
+
+        .transcript {
+            padding: 16px;
+            background: #f7f8f5;
+            border-radius: 10px;
+            font-size: 12px
+        }
+
+        .mobile-label {
+            display: none
+        }
+
+        @media(min-width:1500px) {
+            .workspace {
+                padding-top: 35px
+            }
+
+            .layout {
+                grid-template-columns: 350px 1fr;
+                gap: 36px
+            }
+        }
+
+        @media(max-width:1050px) {
+            .top {
+                padding: 0 24px
+            }
+
+            .workspace {
+                padding: 24px
+            }
+
+            .nav {
+                display: none
+            }
+
+            .layout {
+                grid-template-columns: 290px 1fr;
+                gap: 20px
+            }
+
+            .section,
+            .builder-head,
+            .builder-foot {
+                padding: 20px
+            }
+
+            .answers {
+                grid-template-columns: 1fr
+            }
+
+            .review-hint {
+                display: none
+            }
+
+            .stat {
+                padding: 12px;
+                gap: 8px
+            }
+
+            .stat-icon {
+                display: none
+            }
+
+            .card {
+                padding: 18px
+            }
+
+            .result-head {
+                gap: 10px
+            }
+        }
+
+        @media(max-width:700px) {
+            .top {
+                height: 70px;
+                padding: 0 18px
+            }
+
+            .profile>div:first-child {
+                display: none
+            }
+
+            .workspace {
+                padding: 20px 16px
+            }
+
+            .intro {
+                gap: 12px;
+                align-items: flex-start
+            }
+
+            h1 {
+                font-size: 24px
+            }
+
+            .intro p {
+                font-size: 12px
+            }
+
+            .demo {
+                font-size: 9px;
+                white-space: nowrap
+            }
+
+            .layout {
+                grid-template-columns: 1fr
+            }
+
+            .builder {
+                margin-bottom: 6px
+            }
+
+            .result-head h2 {
+                font-size: 20px
+            }
+
+            .card-bottom {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .actions {
+                align-self: flex-end
+            }
+
+            .bottom-info {
+                gap: 12px
+            }
+
+            .summary {
+                gap: 8px
+            }
+
+            .stat strong {
+                font-size: 18px
+            }
+        }
+
+        /* Neo-Brutalism × playful learning */
+        :root {
+            --bg: #fff9eb;
+            --paper: #fffefa;
+            --ink: #272638;
+            --muted: #686577;
+            --green: #5542ad;
+            --light: #eae2ff;
+            --line: #272638;
+            --orange: #b55a35;
+            --pink: #ffc9df;
+            --yellow: #ffe478;
+            --mint: #c4efcf;
+            --purple: #d7c7ff
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(#d9cfc1 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+        }
+
+        .top {
+            border-bottom: 3px solid var(--ink);
+            background: #fffefa;
+            height: 86px
+        }
+
+        .brand {
+            font-weight: 900;
+            letter-spacing: -1.3px
+        }
+
+        .brand small {
+            color: var(--ink);
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 9px;
+            margin-top: -3px
+        }
+
+        .logo {
+            color: var(--ink);
+            background: var(--mint);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            transform: rotate(-7deg);
+            border-radius: 10px
+        }
+
+        .nav strong {
+            border-bottom: 5px solid var(--ink);
+            color: var(--ink)
+        }
+
+        .avatar {
+            background: var(--pink);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            border-radius: 12px;
+            transform: rotate(5deg)
+        }
+
+        .profile strong {
+            font-weight: 800
+        }
+
+        .breadcrumb {
+            color: #6c6275
+        }
+
+        .breadcrumb b {
+            color: var(--ink);
+            background: var(--yellow);
+            padding: 3px 7px;
+            border: 1px solid var(--ink);
+            border-radius: 4px
+        }
+
+        .intro {
+            padding: 4px 0 8px
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1.2px
+        }
+
+        .intro p {
+            color: #686273
+        }
+
+        .demo {
+            background: var(--pink);
+            color: var(--ink);
+            font-weight: 750;
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            transform: rotate(3deg);
+            border-radius: 7px
+        }
+
+        .builder {
+            border: 2px solid var(--ink);
+            box-shadow: 6px 6px 0 var(--ink);
+            border-radius: 16px;
+            background: var(--paper)
+        }
+
+        .builder-head {
+            background: var(--purple);
+            border-bottom: 2px solid var(--ink);
+            padding-top: 24px;
+            padding-bottom: 22px
+        }
+
+        .builder-head h2 {
+            font-size: 20px;
+            font-weight: 900
+        }
+
+        .builder-head .sub {
+            color: #49415e
+        }
+
+        .section {
+            border-bottom: 2px solid var(--ink)
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800
+        }
+
+        .step {
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 2px 2px 0 var(--ink);
+            color: var(--ink);
+            font-weight: 900;
+            line-height: 20px;
+            transform: rotate(-5deg);
+            border-radius: 5px
+        }
+
+        .file {
+            background: #fff;
+            border: 1.5px solid var(--ink);
+            box-shadow: 2px 2px 0 #ded7e9;
+            border-radius: 9px
+        }
+
+        .file-icon {
+            background: #ffdab3;
+            color: #533529;
+            border: 1.5px solid var(--ink);
+            border-radius: 5px
+        }
+
+        .file-icon.txt {
+            background: var(--mint);
+            color: #2e553b
+        }
+
+        .file .tick {
+            color: #255438;
+            background: var(--mint);
+            border: 1px solid var(--ink);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            font-weight: 900
+        }
+
+        .file small {
+            color: #736a77
+        }
+
+        .upload {
+            border: 2px dashed var(--ink);
+            color: var(--ink);
+            background: #fff9e3;
+            font-weight: 700
+        }
+
+        .graph {
+            color: #48644e;
+            font-weight: 600
+        }
+
+        .dot {
+            background: #4b9c65;
+            border: 1px solid var(--ink);
+            width: 7px;
+            height: 7px
+        }
+
+        .counter {
+            border: 2px solid var(--ink);
+            background: white;
+            gap: 15px;
+            box-shadow: 2px 2px 0 var(--ink)
+        }
+
+        .counter button {
+            background: var(--yellow);
+            font-weight: 900;
+            color: var(--ink)
+        }
+
+        label.field {
+            font-weight: 700
+        }
+
+        .counter output {
+            font-weight: 900
+        }
+
+        .seg button {
+            border: 1.5px solid var(--ink);
+            background: #fff;
+            font-weight: 700
+        }
+
+        .seg button.active {
+            background: var(--purple);
+            color: var(--ink);
+            border-color: var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            transform: translate(-1px, -1px)
+        }
+
+        select {
+            border: 2px solid var(--ink);
+            color: var(--ink);
+            background: #fffefa;
+            font-weight: 600
+        }
+
+        .topic {
+            border: 1.5px solid var(--ink);
+            font-weight: 700;
+            color: var(--ink);
+            background: #fff
+        }
+
+        .topic.active {
+            border-color: var(--ink);
+            background: var(--mint);
+            color: var(--ink);
+            box-shadow: 2px 2px 0 var(--ink)
+        }
+
+        .topic.active:nth-child(2) {
+            background: var(--yellow)
+        }
+
+        .topic.active:nth-child(3) {
+            background: var(--pink)
+        }
+
+        .topic.active:nth-child(4) {
+            background: var(--purple)
+        }
+
+        .note {
+            background: #fff4c9;
+            color: #66552d;
+            border: 1.5px solid var(--ink);
+            border-radius: 8px
+        }
+
+        .primary {
+            background: var(--purple);
+            border: 2px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 900;
+            padding: 12px 17px
+        }
+
+        .footnote {
+            color: #776e7c;
+            margin-top: 14px
+        }
+
+        .kicker {
+            color: #655c78;
+            font-weight: 800;
+            letter-spacing: 1.8px
+        }
+
+        .result-head h2 {
+            font-weight: 900;
+            font-size: 25px
+        }
+
+        .outline {
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-weight: 800;
+            color: var(--ink)
+        }
+
+        .outline:disabled {
+            opacity: .55;
+            filter: grayscale(.35)
+        }
+
+        .summary {
+            gap: 14px
+        }
+
+        .stat {
+            border: 2px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            background: var(--purple);
+            border-radius: 12px
+        }
+
+        .stat:nth-child(2) {
+            background: var(--yellow)
+        }
+
+        .stat:nth-child(3) {
+            background: var(--mint)
+        }
+
+        .stat-icon,
+        .stat:nth-child(2) .stat-icon {
+            background: #ffffff80;
+            border: 1.5px solid var(--ink);
+            color: var(--ink);
+            border-radius: 9px
+        }
+
+        .stat strong {
+            font-size: 25px;
+            font-weight: 900
+        }
+
+        .stat span.sub {
+            color: #4b465a;
+            font-weight: 650
+        }
+
+        .tabs {
+            border-bottom: 2px solid var(--ink);
+            gap: 9px;
+            padding-top: 5px;
+            align-items: stretch
+        }
+
+        .tabs button {
+            padding: 8px 10px;
+            border: 2px solid transparent;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: -2px;
+            color: #655d71;
+            font-weight: 700
+        }
+
+        .tabs button.active {
+            background: var(--pink);
+            border: 2px solid var(--ink);
+            color: var(--ink)
+        }
+
+        .tabs small {
+            background: #fffefa;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            border-radius: 4px;
+            font-weight: 800
+        }
+
+        .review-hint {
+            align-self: center;
+            margin: 0 0 0 auto;
+            font-size: 9px
+        }
+
+        .card {
+            border: 2px solid var(--ink);
+            box-shadow: 5px 5px 0 var(--ink);
+            border-radius: 14px;
+            margin-bottom: 22px;
+            background: var(--paper);
+            position: relative;
+            overflow: hidden
+        }
+
+        .card-top {
+            margin-bottom: 16px
+        }
+
+        .number {
+            font-weight: 900;
+            background: var(--yellow);
+            border: 1.5px solid var(--ink);
+            border-radius: 6px;
+            padding: 4px 8px;
+            transform: rotate(-3deg)
+        }
+
+        .badge {
+            background: var(--purple);
+            color: #443866;
+            font-weight: 750;
+            border: 1px solid var(--ink);
+            border-radius: 5px
+        }
+
+        .badge.level {
+            background: #ffdfbc;
+            color: #674625
+        }
+
+        .state {
+            color: #71616c;
+            font-weight: 650
+        }
+
+        .state.approved {
+            color: #326d44;
+            background: var(--mint);
+            border: 1px solid var(--ink);
+            border-radius: 5px;
+            padding: 3px 7px
+        }
+
+        .state.rejected {
+            color: #8a414d
+        }
+
+        .question {
+            font-size: 15px;
+            font-weight: 800
+        }
+
+        .answers {
+            gap: 11px
+        }
+
+        .answer {
+            border: 1.5px solid #96909d;
+            border-radius: 8px;
+            background: white;
+            color: #383344;
+            font-size: 12px;
+            line-height: 1.5;
+            padding: 11px 12px
+        }
+
+        .answer:hover {
+            background: #f4edff;
+            border-color: var(--ink);
+            box-shadow: 2px 2px 0 var(--ink);
+            filter: none;
+            transform: translate(-1px, -1px)
+        }
+
+        .letter {
+            border: 1.5px solid var(--ink);
+            background: #f8f4ec;
+            color: var(--ink);
+            font-weight: 800;
+            border-radius: 6px;
+            width: 25px;
+            height: 25px
+        }
+
+        .answer.selected {
+            background: #e0f5dd;
+            border: 2px solid #305a3a;
+            box-shadow: 2px 2px 0 #305a3a
+        }
+
+        .answer.selected .letter {
+            background: #80c792;
+            border: 1.5px solid #305a3a;
+            color: #183b24
+        }
+
+        .answer.wrong {
+            background: #ffe4e7;
+            border: 2px solid #a15464
+        }
+
+        .explanation {
+            color: #486341;
+            font-weight: 600
+        }
+
+        .card-bottom {
+            border-top: 1.5px dashed #b7afbd;
+            padding-top: 14px
+        }
+
+        .source {
+            color: #65537f;
+            font-weight: 650
+        }
+
+        .source:hover {
+            text-decoration: underline
+        }
+
+        .actions button {
+            border: 1.5px solid var(--ink);
+            box-shadow: 2px 2px 0 var(--ink);
+            background: #fff3f3;
+            color: #65505c;
+            font-weight: 700;
+            padding: 7px 10px
+        }
+
+        .actions button.approve {
+            background: var(--mint);
+            border-color: var(--ink);
+            color: #294533
+        }
+
+        .empty {
+            background: #fffefa;
+            border: 2px dashed var(--ink);
+            color: #746a82
+        }
+
+        .bottom-info {
+            color: #776e7f
+        }
+
+        .toast {
+            background: var(--yellow);
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            box-shadow: 5px 5px 0 var(--ink);
+            font-weight: 750
+        }
+
+        .mission {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 0 22px;
+            background: #fffefa;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            padding: 14px 17px;
+            box-shadow: 4px 4px 0 var(--ink)
+        }
+
+        .mission-mark {
+            background: var(--pink);
+            border: 2px solid var(--ink);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            transform: rotate(8deg)
+        }
+
+        .mission-copy {
+            min-width: 0;
+            flex: 1
+        }
+
+        .mission-title {
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px
+        }
+
+        .mission-title span {
+            font-size: 10px;
+            color: #79648f
+        }
+
+        .progress {
+            height: 10px;
+            border: 1.5px solid var(--ink);
+            background: #f0eaf6;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 7px
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: #ad8fe8;
+            border-right: 1.5px solid var(--ink);
+            transition: width .3s
+        }
+
+        .mission-done {
+            background: var(--mint);
+            font-size: 10px;
+            font-weight: 800;
+            border: 1.5px solid var(--ink);
+            padding: 5px 8px;
+            border-radius: 5px;
+            white-space: nowrap
+        }
+
+        dialog {
+            background: var(--paper);
+            border: 3px solid var(--ink);
+            box-shadow: 9px 9px 0 var(--ink)
+        }
+
+        dialog::backdrop {
+            background: #30223b77
+        }
+
+        .close {
+            background: var(--pink);
+            border: 2px solid var(--ink);
+            box-shadow: 2px 2px 0 var(--ink)
+        }
+
+        .slide {
+            background: #eee5ff;
+            border: 2px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            border-radius: 10px
+        }
+
+        .slide h3 {
+            font-weight: 900
+        }
+
+        .transcript {
+            background: #fff1c3;
+            border: 1.5px solid var(--ink);
+            margin-top: 20px
+        }
+
+        button:hover {
+            filter: none
+        }
+
+        button:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: none
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #9660cf;
+            outline-offset: 4px
+        }
+
+        @media(max-width:1050px) {
+            .review-hint {
+                display: none
+            }
+
+            .tabs {
+                gap: 3px
+            }
+
+            .tabs button {
+                padding: 8px 6px
+            }
+
+            .stat strong {
+                font-size: 22px
+            }
+
+            h1 {
+                font-size: 29px
+            }
+
+            .mission {
+                padding: 12px
+            }
+
+            .mission-title {
+                flex-wrap: wrap;
+                gap: 2px
+            }
+        }
+
+        @media(max-width:700px) {
+            h1 {
+                font-size: 26px
+            }
+
+            .intro {
+                flex-wrap: wrap;
+                gap: 14px
+            }
+
+            .demo {
+                margin: 2px 0 2px auto
+            }
+
+            .builder {
+                box-shadow: 4px 4px 0 var(--ink)
+            }
+
+            .result-head h2 {
+                font-size: 22px
+            }
+
+            .result-head {
+                margin-top: 8px
+            }
+
+            .mission-done {
+                display: none
+            }
+
+            .mission-title {
+                font-size: 11px
+            }
+
+            .stat {
+                padding: 12px 9px
+            }
+
+            .stat span.sub {
+                font-size: 9px
+            }
+
+            .card {
+                box-shadow: 4px 4px 0 var(--ink)
+            }
+
+            .state {
+                font-size: 9px
+            }
+
+            .badge {
+                font-size: 8px
+            }
+
+            .card-top {
+                gap: 5px
+            }
+
+            .number {
+                font-size: 10px;
+                padding: 4px 6px
+            }
+
+            .tabs button {
+                font-size: 11px
+            }
+
+            .tabs small {
+                margin-left: 2px
+            }
+
+            .top {
+                height: 76px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                transition: none !important;
+                scroll-behavior: auto !important
+            }
+        }
+
+
+        .refill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #fff1bd;
+            border: 2px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            border-radius: 12px;
+            padding: 15px 18px;
+            margin-bottom: 22px
+        }
+
+        .refill[hidden] {
+            display: none
+        }
+
+        .refill strong {
+            font-size: 13px
+        }
+
+        .refill p {
+            font-size: 11px;
+            margin-top: 3px
+        }
+
+        .refill button {
+            white-space: nowrap;
+            font-size: 12px
+        }
+
+        .file-details {
+            min-width: 0;
+            flex: 1
+        }
+
+        .file-details strong {
+            overflow-wrap: anywhere
+        }
+
+        .remove-file {
+            border: 1px solid var(--ink);
+            background: var(--pink);
+            border-radius: 5px;
+            flex-shrink: 0
+        }
+
+        .upload-help {
+            font-size: 10px;
+            color: var(--muted);
+            margin: 8px 0
+        }
+
+        .answer-key {
+            font-weight: 800;
+            color: #305a3a
+        }
+
+        .answer {
+            cursor: default
+        }
+
+        .answer:hover {
+            transform: none;
+            box-shadow: none
+        }
+
+        .explanation {
+            line-height: 1.7
+        }
+
+        .preview-link {
+            border: 0;
+            background: none;
+            font-size: 11px;
+            text-decoration: underline;
+            color: var(--green);
+            padding: 8px 0
+        }
+
+        @media(max-width:700px) {
+            .refill {
+                align-items: stretch;
+                flex-direction: column
+            }
+
+            .refill button {
+                width: 100%
+            }
+        }
+
+        .path-panel {
+            background: #fffefa;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            box-shadow: 4px 4px 0 var(--ink);
+            padding: 18px;
+            margin-bottom: 22px
+        }
+
+        .path-panel[hidden] {
+            display: none
+        }
+
+        .path-panel[data-kind="blocked"],
+        .path-panel[data-kind="failure"] {
+            background: #ffe4e7
+        }
+
+        .path-panel[data-kind="low"] {
+            background: #fff0bd
+        }
+
+        .path-panel[data-kind="success"],
+        .path-panel[data-kind="correction"] {
+            background: #e0f5dd
+        }
+
+        .path-panel h3 {
+            font-size: 16px;
+            margin: 5px 0 8px
+        }
+
+        .path-panel p {
+            font-size: 12px
+        }
+
+        .path-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px
+        }
+
+        .path-actions button {
+            border: 1.5px solid var(--ink);
+            border-radius: 6px;
+            background: white;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .evidence-note {
+            font-size: 10px;
+            margin-top: 12px;
+            color: #6a5476
+        }
+
+        .edit-form label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 12px
+        }
+
+        .edit-form textarea,
+        .edit-form input,
+        .edit-form select {
+            display: block;
+            width: 100%;
+            border: 2px solid var(--ink);
+            border-radius: 7px;
+            padding: 9px;
+            font: inherit;
+            background: white;
+            color: var(--ink);
+            margin: 5px 0 0
+        }
+
+        .edit-form textarea {
+            min-height: 75px;
+            resize: vertical
+        }
+
+        .edit-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 12px
+        }
+
+        .edit-error {
+            color: #9a3049;
+            font-size: 12px;
+            margin-top: 12px
+        }
+
+        .edit-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 18px
+        }
+
+        .edited-label {
+            font-size: 10px;
+            background: #fff0bd;
+            padding: 4px 7px;
+            border: 1px solid var(--ink);
+            border-radius: 5px;
+            margin: 0 0 10px;
+            display: inline-block
+        }
+
+        .actions {
+            flex-wrap: wrap
+        }
+
+        .topic[data-topic="Evaluation"],
+        .topic[data-topic="Fine-tuning"] {
+            border-style: dashed
+        }
+
+        .topic[data-topic="Tài chính"] {
+            border-style: dotted
+        }
+
+        @media(max-width:700px) {
+            .edit-options {
+                grid-template-columns: 1fr
+            }
+        }
+
+        [hidden] {
+            display: none !important
+        }
+
+        .initial-state,
+        .loading-state {
+            min-height: 480px;
+            border: 2px solid var(--ink);
+            border-radius: 18px;
+            background: #fffefa;
+            box-shadow: 6px 6px 0 var(--ink);
+            padding: 65px 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .initial-state h2,
+        .loading-state h2 {
+            font-size: 25px;
+            font-weight: 900;
+            margin: 18px 0 12px
+        }
+
+        .initial-state p,
+        .loading-state p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.9
+        }
+
+        .empty-art {
+            position: relative;
+            width: 95px;
+            height: 95px;
+            background: var(--purple);
+            border: 3px solid var(--ink);
+            border-radius: 22px;
+            box-shadow: 6px 6px 0 var(--ink);
+            display: grid;
+            place-items: center;
+            transform: rotate(-7deg);
+            margin-bottom: 30px
+        }
+
+        .empty-art svg {
+            width: 49px;
+            height: 49px;
+            stroke-width: 1.5
+        }
+
+        .art-plus {
+            position: absolute;
+            right: -16px;
+            top: -14px;
+            width: 35px;
+            height: 35px;
+            border: 2px solid var(--ink);
+            border-radius: 50%;
+            background: var(--yellow);
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 29px
+        }
+
+        .empty-tag {
+            font-size: 9px;
+            letter-spacing: 1.4px;
+            font-weight: 800;
+            color: #746288
+        }
+
+        .empty-steps {
+            display: flex;
+            gap: 9px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center
+        }
+
+        .empty-steps span {
+            font-size: 10px;
+            background: var(--mint);
+            border: 1.5px solid var(--ink);
+            border-radius: 6px;
+            padding: 6px 10px
+        }
+
+        .empty-steps span:nth-child(2) {
+            background: var(--yellow)
+        }
+
+        .empty-steps span:nth-child(3) {
+            background: var(--pink)
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--purple);
+            border-top-color: var(--ink);
+            border-right-color: var(--ink);
+            border-radius: 50%;
+            animation: spin 1s linear infinite
+        }
+
+        .loading-state .sub {
+            margin-top: 10px;
+            font-size: 10px
+        }
+
+        .skeleton-card {
+            width: 100%;
+            max-width: 470px;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            background: #faf7ff;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: left
+        }
+
+        .skeleton-card>div {
+            height: 12px;
+            background: #ded2f3;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            animation: pulse 1.1s ease-in-out infinite alternate
+        }
+
+        .skeleton-card>div:first-child {
+            width: 35%;
+            background: #ffe478
+        }
+
+        .skeleton-card>div:nth-child(2) {
+            width: 80%
+        }
+
+        .skeleton-card section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .skeleton-card i {
+            height: 32px;
+            background: #ebe5f4;
+            border-radius: 6px
+        }
+
+        .generate:disabled {
+            opacity: .75
+        }
+
+        .results[aria-busy="true"] .result-head {
+            opacity: .65
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        @keyframes pulse {
+            to {
+                opacity: .4
+            }
+        }
+
+        @media(max-width:700px) {
+
+            .initial-state,
+            .loading-state {
+                min-height: 390px;
+                padding: 40px 18px
+            }
+
+            .initial-state h2,
+            .loading-state h2 {
+                font-size: 22px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            .loading-spinner,
+            .skeleton-card>div {
+                animation: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <svg style="display:none" aria-hidden="true">
+        <defs>
+            <symbol id="book" viewBox="0 0 24 24">
+                <path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1v14" />
+            </symbol>
+            <symbol id="leaf" viewBox="0 0 24 24">
+                <path d="M5 20c0-8 8-8 13-15M5 16C-1 5 10 3 21 3c0 12-6 18-16 13Z" />
+            </symbol>
+            <symbol id="check" viewBox="0 0 24 24">
+                <path d="m5 12 4 4L19 6" />
+            </symbol>
+            <symbol id="download" viewBox="0 0 24 24">
+                <path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5" />
+            </symbol>
+            <symbol id="link" viewBox="0 0 24 24">
+                <path d="m9 15 6-6m-6-2 3-3a5 5 0 0 1 7 7l-3 3m-1 3-3 3a5 5 0 0 1-7-7l3-3" />
+            </symbol>
+            <symbol id="grid" viewBox="0 0 24 24">
+                <rect x="4" y="4" width="6" height="6" rx="1" />
+                <rect x="14" y="4" width="6" height="6" rx="1" />
+                <rect x="4" y="14" width="6" height="6" rx="1" />
+                <rect x="14" y="14" width="6" height="6" rx="1" />
+            </symbol>
+        </defs>
+    </svg>
+    <header class="top">
+        <div class="brand">
+            <div class="logo"><svg>
+                    <use href="#leaf" />
+                </svg></div>
+            <div>lessonleaf<small>GROW KNOWLEDGE</small></div>
+        </div>
+        <nav class="nav" aria-label="Không gian hiện tại"><span>Không gian giảng dạy</span><strong>Trình tạo
+                quiz</strong></nav>
+        <div class="profile">
+            <div><strong>Minh Anh</strong><span class="sub">Giảng viên</span></div>
+            <div class="avatar">MA</div>
+        </div>
+    </header>
+    <main class="workspace">
+        <div class="breadcrumb">Không gian giảng dạy &nbsp; / &nbsp; Trí tuệ nhân tạo &nbsp; / &nbsp; <b>Tạo quiz</b>
+        </div>
+        <div class="intro">
+            <div>
+                <h1>Biến bài giảng thành thử thách!</h1>
+                <p class="muted">Một chút tò mò, một bộ quiz hay. Cùng mở khóa kiến thức mới!</p>
+            </div><span class="demo">AI THẬT · Knowledge Graph</span>
+        </div>
+        <div class="layout">
+            <aside class="builder">
+                <div class="builder-head">
+                    <h2>Xưởng tạo thử thách</h2>
+                    <p class="sub">Một chút thiết lập, nhiều điều để khám phá.</p>
+                </div>
+                <section class="section">
+                    <div class="section-title"><span class="step">01</span>Tài liệu bài giảng</div>
+                    <div id="added-files"></div><input type="file" id="file-input"
+                        accept=".pdf,.md,.txt" multiple hidden><button class="upload" id="add-files">+
+                        &nbsp; Thêm tài liệu</button>
+                    <p class="upload-help">PDF, MD, TXT · Tối đa 20 MB/tệp.</p>
+                    <div class="graph" id="kg-badge"><span class="dot"></span>Knowledge Graph · đang tải…</div>
+                </section>
+                <section class="section">
+                    <div class="section-title"><span class="step">02</span>Cấu hình câu hỏi</div>
+                    <div class="row"><label class="field" for="count">Số lượng câu hỏi</label>
+                        <div class="counter"><button id="minus" aria-label="Giảm số câu">−</button><output
+                                id="count">6</output><button id="plus" aria-label="Tăng số câu">+</button></div>
+                    </div><label class="field" style="margin-top:18px">Độ khó</label>
+                    <div class="seg" id="levels"><button data-level="Dễ">Dễ</button><button
+                            data-level="Trung bình">Trung bình</button><button data-level="Kết hợp" class="active">Kết
+                            hợp</button></div><label class="field" for="scope">Phạm vi kiến thức</label><select
+                        id="scope">
+                        <option value="all">Tất cả chủ đề</option>
+                        <option value="custom">Chọn chủ đề cụ thể</option>
+                    </select>
+                    <div class="topics" id="topics"></div>
+                    <p class="evidence-note" id="evidence-note">Đang tải chủ đề từ knowledge graph…</p>
+                </section>
+                <div class="builder-foot">
+                    <div class="note"><svg style="flex-shrink:0;width:16px">
+                            <use href="#leaf" />
+                        </svg><span>Chỉ tạo câu hỏi từ concept có đủ bằng chứng trong tài liệu nguồn.</span></div>
+                    <button class="primary generate" id="generate">Tạo thử thách &nbsp; →</button>
+                </div>
+            </aside>
+            <section class="results">
+                <div class="result-head">
+                    <div>
+                        <div class="kicker">TRẠM KHÁM PHÁ KIẾN THỨC</div>
+                        <h2>Khám phá mô hình ngôn ngữ</h2>
+                        <p class="sub" id="result-description">Chưa tạo bộ quiz · Introduction to LLM</p>
+                    </div><button class="outline" id="export" disabled><svg>
+                            <use href="#download" />
+                        </svg>Xuất quiz</button>
+                </div>
+                <section class="path-panel" id="path-panel" role="status" aria-live="polite" hidden>
+                    <div class="kicker" id="path-label"></div>
+                    <h3 id="path-title"></h3>
+                    <p id="path-message"></p>
+                    <div class="path-actions"><button id="path-supported" hidden>Chỉ chọn chủ đề đủ căn
+                            cứ</button><button id="path-upload" hidden>Thêm tài liệu bổ sung</button></div>
+                </section>
+                <div id="initial-state" class="initial-state">
+                    <div class="empty-art" aria-hidden="true"><svg>
+                            <use href="#book" />
+                        </svg><span class="art-plus">+</span></div><span class="empty-tag">SẴN SÀNG CHO Ý TƯỞNG ĐẦU
+                        TIÊN</span>
+                    <h2>Bộ quiz của bạn bắt đầu từ đây</h2>
+                    <p>Chọn tài liệu, số câu và chủ đề ở bên trái.<br>Bấm <strong>Tạo thử thách</strong> để khám phá bộ
+                        câu hỏi của bạn.</p>
+                    <div class="empty-steps"><span>01 · Thiết lập</span><span>02 · Tạo quiz</span><span>03 · Duyệt &
+                            sửa</span></div>
+                </div>
+                <div id="loading-state" class="loading-state" role="status" aria-live="polite" hidden>
+                    <div class="loading-spinner" aria-hidden="true"></div>
+                    <h2>AI đang sinh câu hỏi từ knowledge graph…</h2>
+                    <p id="loading-detail">Kiểm tra căn cứ và chuẩn bị câu hỏi theo cấu hình của bạn.</p><span class="sub">AI thật · GPT-4o-mini · <span id="loading-elapsed">0s</span></span>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <div></div>
+                        <div></div>
+                        <section><i></i><i></i><i></i><i></i></section>
+                    </div>
+                </div>
+                <div class="summary" hidden>
+                    <div class="stat">
+                        <div class="stat-icon"><svg>
+                                <use href="#book" />
+                            </svg></div>
+                        <div><strong id="total">6</strong><span class="sub">Câu hỏi trong bộ</span></div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon"><svg>
+                                <use href="#grid" />
+                            </svg></div>
+                        <div><strong id="coverage">4 / 4</strong><span class="sub">Chủ đề được bao phủ</span></div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon"><svg>
+                                <use href="#check" />
+                            </svg></div>
+                        <div><strong id="approved">0 / 6</strong><span class="sub">Câu hỏi đã duyệt</span></div>
+                    </div>
+                </div>
+                <div class="mission" hidden>
+                    <div class="mission-mark"><svg aria-hidden="true">
+                            <use href="#check" />
+                        </svg></div>
+                    <div class="mission-copy">
+                        <div class="mission-title">Nhiệm vụ: duyệt bộ câu hỏi <span id="mission-count">0 / 6 hoàn
+                                tất</span></div>
+                        <div class="progress" role="progressbar" aria-label="Tiến độ duyệt câu hỏi" aria-valuemin="0"
+                            aria-valuemax="100" aria-valuenow="0" id="review-progress">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div><span class="mission-done" id="mission-badge">Bắt đầu thôi!</span>
+                </div>
+                <div class="refill" id="refill-panel" hidden>
+                    <div><strong id="refill-title"></strong>
+                        <p id="refill-description"></p>
+                    </div><button class="primary" id="refill">Bù câu hỏi</button>
+                </div>
+                <div class="tabs" id="tabs" hidden><button class="active" data-tab="all">Tất cả <small
+                            id="all-n">6</small></button><button data-tab="pending">Chờ duyệt <small
+                            id="pending-n">6</small></button><button data-tab="approved">Đã duyệt <small
+                            id="approved-n">0</small></button><button data-tab="rejected">Đã loại <small
+                            id="rejected-n">0</small></button><span class="review-hint">Đáp án đúng được tô xanh</span>
+                </div>
+                <div id="cards"></div>
+                <div class="bottom-info" hidden><span>Mỗi câu hỏi đều có một điểm tựa kiến thức.</span><span>Giảng viên
+                        duyệt trước khi sử dụng</span></div>
+            </section>
+        </div>
+    </main>
+    <dialog id="edit-dialog">
+        <form class="edit-form" id="edit-form">
+            <div class="modal-top">
+                <div>
+                    <div class="kicker">CORRECTION · GIẢNG VIÊN HIỆU CHỈNH</div>
+                    <h2>Sửa câu hỏi</h2>
+                </div><button type="button" class="close" id="edit-close" aria-label="Đóng trình sửa">×</button>
+            </div>
+            <p class="sub" id="edit-source"></p><label for="edit-question">Nội dung câu hỏi</label><textarea
+                id="edit-question" required maxlength="1000"></textarea>
+            <div class="edit-options"><label for="edit-option-0">Phương án A<input id="edit-option-0" required
+                        maxlength="500"></label><label for="edit-option-1">Phương án B<input id="edit-option-1" required
+                        maxlength="500"></label><label for="edit-option-2">Phương án C<input id="edit-option-2" required
+                        maxlength="500"></label><label for="edit-option-3">Phương án D<input id="edit-option-3" required
+                        maxlength="500"></label></div><label for="edit-correct">Đáp án đúng</label><select
+                id="edit-correct">
+                <option value="0">A</option>
+                <option value="1">B</option>
+                <option value="2">C</option>
+                <option value="3">D</option>
+            </select><label for="edit-explanation">Giải thích dựa trên nguồn</label><textarea id="edit-explanation"
+                required maxlength="2000"></textarea>
+            <p class="upload-help">Sau khi lưu, câu hỏi trở về Chờ duyệt. Giảng viên cần đối chiếu lại nguồn; mock không
+                tự xác minh nội dung sửa.</p>
+            <p class="edit-error" id="edit-error" role="alert"></p>
+            <div class="edit-footer"><button type="button" class="outline" id="edit-cancel">Hủy</button><button
+                    type="submit" class="primary">Lưu và duyệt lại</button></div>
+        </form>
+    </dialog>
+    <dialog id="source-dialog">
+        <div class="modal-top">
+            <div>
+                <div class="kicker">TÀI LIỆU THAM CHIẾU · DỮ LIỆU MẪU</div>
+                <h2 id="source-title"></h2>
+            </div><button class="close" aria-label="Đóng tài liệu">×</button>
+        </div>
+        <div class="slide">
+            <div class="kicker" id="slide-page"></div>
+            <h3 id="slide-title"></h3>
+            <p id="slide-text"></p>
+        </div>
+        <div class="transcript"><strong id="transcript-code"></strong>
+            <p id="transcript-text" style="margin-top:8px"></p>
+        </div>
+        <p class="sub" style="margin-top:16px">Nội dung minh họa để kiểm tra căn cứ của câu hỏi.</p>
+    </dialog>
+    <div class="toast" role="status" id="toast"></div>
+    <script>
+        // Additional mock questions share the same cited lesson excerpts.
+        const extraQuestions = [
+            [0, 'Token có thể biểu diễn thành phần nào sau đây?', ['Chỉ một câu hoàn chỉnh', 'Một phần của từ hoặc dấu câu', 'Chỉ số của trang slide', 'Chỉ một đoạn văn'], 1],
+            [0, 'Trước khi xử lý ngôn ngữ, văn bản được biểu diễn thành gì?', ['Các token', 'Các tên tệp', 'Các trang trình chiếu', 'Các nhãn màu'], 0],
+            [4, 'Hai tokenizer khác nhau có luôn tạo cùng số token không?', ['Có, với mọi văn bản', 'Có, nếu văn bản có dấu câu', 'Không, cách phân tách có thể khác nhau', 'Không, vì tokenizer luôn bỏ từ'], 2],
+            [4, 'Nhận định nào đúng về mối quan hệ giữa từ và token?', ['Một từ luôn bằng một token', 'Một token luôn bằng một câu', 'Số từ luôn lớn hơn số token', 'Một từ có thể gồm nhiều token'], 3],
+            [1, 'Prompt yêu cầu trả lời bằng bảng đang chỉ rõ điều gì?', ['Định dạng đầu ra', 'Trọng số mô hình', 'Thuật toán huấn luyện', 'Dung lượng bộ nhớ'], 0],
+            [1, 'Muốn mô hình tóm tắt bài giảng thành ba ý, nên viết yêu cầu nào?', ['Hãy làm gì đó với bài giảng', 'Tóm tắt bài giảng này thành ba ý chính', 'Hãy trả lời thật dài', 'Bỏ qua nội dung bài giảng'], 1],
+            [6, 'Ví dụ minh họa trong prompt có thể giúp ích gì?', ['Bảo đảm mọi câu trả lời đều đúng', 'Thay đổi trọng số mô hình', 'Làm rõ yêu cầu cần thực hiện', 'Loại bỏ nhu cầu về nhiệm vụ'], 2],
+            [6, 'Yêu cầu nào mô tả một nhiệm vụ cụ thể?', ['Hãy xử lý', 'Cho tôi kết quả', 'Làm điều phù hợp', 'Giải thích khái niệm token trong hai câu'], 3],
+            [2, 'Nếu đoạn truy xuất không liên quan, phần nào của RAG bị ảnh hưởng trực tiếp?', ['Ngữ cảnh cung cấp cho mô hình', 'Kích thước màn hình', 'Định dạng tên mô hình', 'Số trang của tài liệu gốc'], 0],
+            [2, 'Thông tin truy xuất được đưa vào đâu trước khi sinh câu trả lời?', ['Tên tệp đầu ra', 'Ngữ cảnh của mô hình', 'Bảng màu giao diện', 'Danh sách trọng số mới'], 1],
+            [7, 'RAG tìm thông tin liên quan từ đâu trong ví dụ bài học?', ['Các màu trên giao diện', 'Số thứ tự câu hỏi', 'Nguồn tài liệu', 'Tên người dùng'], 2],
+            [7, 'Sau bước truy xuất, mô hình làm gì trong RAG?', ['Xóa nguồn tài liệu', 'Bỏ qua ngữ cảnh', 'Huấn luyện lại từ đầu', 'Sinh câu trả lời với ngữ cảnh tìm được'], 3],
+            [3, 'Mô hình tự hồi quy sử dụng gì để dự đoán token tiếp theo?', ['Các token trong ngữ cảnh', 'Chỉ tên của tài liệu', 'Chỉ thời gian hiện tại', 'Chỉ số thứ tự trang'], 0],
+            [3, 'Sau khi sinh một token mới, mô hình thường làm gì?', ['Xóa mọi token cũ', 'Thêm token vào chuỗi để tiếp tục sinh', 'Kết thúc mọi câu trả lời', 'Đổi tokenizer ngay lập tức'], 1],
+            [5, 'Câu trả lời trôi chảy có bảo đảm thông tin chính xác không?', ['Có, trong mọi trường hợp', 'Có, khi câu trả lời dài', 'Không, vẫn cần đối chiếu nguồn', 'Không cần kiểm tra nếu có ví dụ'], 2],
+            [5, 'Đâu là căn cứ phù hợp khi duyệt nội dung do LLM sinh?', ['Giọng văn tự tin', 'Độ dài câu trả lời', 'Số lượng thuật ngữ', 'Nguồn tài liệu đáng tin cậy'], 3]
+        ];
+        let questions = [], isGenerating = false, count = 6, level = 'Kết hợp', selectedTopics = new Set(), tab = 'all', toastTimer, generatedTopicCount = 0, targetCount = 6, generationLevel = 'Kết hợp', generationTopics = new Set();
+        let activeGraphId = null, skippedTopics = [];
+        let addedFiles = [], editingId = null;
+        const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        function showPath(kind, title, message, actions = []) { $('#path-panel').hidden = false; $('#path-panel').dataset.kind = kind; $('#path-label').textContent = { success: 'HAPPY PATH', low: 'LOW-CONFIDENCE · CHƯA ĐỦ CĂN CỨ', blocked: 'FAILURE · TỪ CHỐI AN TOÀN', failure: 'FAILURE · LỖI XỬ LÝ', correction: 'CORRECTION · NGƯỜI DÙNG SỬA' }[kind]; $('#path-title').textContent = title; $('#path-message').textContent = questions.length ? message : message.replaceAll('Bộ hiện tại được giữ nguyên.', 'Chưa có câu hỏi nào được tạo.').replaceAll('bộ hiện tại được giữ nguyên.', 'chưa có câu hỏi nào được tạo.').replaceAll('Cấu hình và bộ quiz hiện tại được giữ nguyên.', 'Cấu hình được giữ nguyên; chưa có câu hỏi nào được tạo.');['supported', 'upload'].forEach(a => $('#path-' + a).hidden = !actions.includes(a)) }
+
+        const $ = s => document.querySelector(s); const icon = n => `<svg aria-hidden="true"><use href="#${n}"/></svg>`;
+        function notify(t) { $('#toast').textContent = t; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').textContent = '', 3500) }
+        function render() { const hasQuiz = questions.length > 0; $('#initial-state').hidden = hasQuiz || isGenerating; $('#loading-state').hidden = !isGenerating;['.summary', '.mission', '#tabs', '#cards', '.bottom-info'].forEach(selector => $(selector).hidden = !hasQuiz || isGenerating); $('.results').setAttribute('aria-busy', String(isGenerating)); const counts = { pending: 0, approved: 0, rejected: 0 }; questions.forEach(q => counts[q.status]++); const active = questions.filter(q => q.status !== 'rejected'), missing = Math.max(0, targetCount - active.length); $('#total').textContent = active.length + ' / ' + targetCount; $('#refill-panel').hidden = !hasQuiz || isGenerating || missing === 0; $('#refill-title').textContent = 'Còn thiếu ' + missing + ' câu so với mục tiêu ' + targetCount + ' câu'; $('#refill-description').textContent = activeGraphId ? 'Giữ nguyên câu đã duyệt; AI sẽ sinh thêm câu mới từ knowledge graph theo cấu hình ban đầu.' : 'Chưa có tài liệu nào được phân tích.';         $('#refill').textContent = 'Bù ' + missing + ' câu hỏi'; $('#refill').disabled = !hasQuiz || isGenerating || missing === 0; $('#coverage').textContent = generatedTopicCount ? (() => { const wanted = Array.from(generationTopics).map(t => t.toLowerCase()); const hit = new Set(); active.forEach(q => { const t = (q.topic || '').toLowerCase(); wanted.forEach(w => { if (t === w || (w.length >= 4 && (t.includes(w) || w.includes(t))) || (t.length >= 4 && w.includes(t))) hit.add(w) }) }); return hit.size + ' / ' + generatedTopicCount })() : '—'; $('#approved').textContent = counts.approved + ' / ' + targetCount; $('#all-n').textContent = questions.length; Object.keys(counts).forEach(s => $('#' + s + '-n').textContent = counts[s]); $('#export').disabled = isGenerating || !counts.approved; const reviewed = counts.approved + counts.rejected, progress = questions.length ? Math.round(reviewed / questions.length * 100) : 0; $('#mission-count').textContent = reviewed + ' / ' + questions.length + ' hoàn tất'; $('#progress-fill').style.width = progress + '%'; $('#review-progress').setAttribute('aria-valuenow', progress); $('#mission-badge').textContent = progress === 100 ? 'Hoàn thành!' : progress > 0 ? 'Tiếp tục nào!' : 'Bắt đầu thôi!'; const visible = questions.filter(q => tab === 'all' || q.status === tab); $('#cards').innerHTML = visible.length ? visible.map(q => `<article class="card"><div class="card-top"><span class="number">Câu ${String(q.id + 1).padStart(2, '0')}</span><span class="badge">${q.topic}</span><span class="badge level">${q.level}</span><span class="state ${q.status}">${q.status === 'approved' ? '✓ Đã duyệt' : q.status === 'rejected' ? 'Đã loại' : '○ Chờ duyệt'}</span></div><div class="question">${escapeHTML(q.q)}</div>${q.edited ? '<div class="edited-label">Giảng viên đã sửa · cần đối chiếu nguồn</div>' : ''}<div class="answers">${q.a.map((a, i) => `<div class="answer ${i === q.correct ? 'selected' : ''} ${q.selected === i && i !== q.correct ? 'wrong' : ''}"><span class="letter">${'ABCD'[i]}</span>${escapeHTML(a)}${i === q.correct ? ' <span class="answer-key">✓</span>' : ''}</div>`).join('')}</div><div class="explanation show"><strong>Đáp án đúng: ${'ABCD'[q.correct]}.</strong> ${escapeHTML(q.explain)}</div><div class="card-bottom"><button class="source" data-source="${q.id}">${icon('link')} Slide ${q.page} <span>·</span> ${q.code} <span>↗</span></button><div class="actions">${q.status !== 'rejected' ? `<button data-edit="${q.id}">Sửa câu hỏi</button>` : ''}${q.status === 'pending' ? `<button data-status="${q.id},rejected">Loại câu hỏi</button><button class="approve" data-status="${q.id},approved">✓ &nbsp; Duyệt câu hỏi</button>` : `<button data-status="${q.id},pending">Hoàn tác</button>`}</div></div></article>`).join('') : '<div class="empty">Chưa có câu hỏi trong mục này.</div>' }
+        function openSource(q) { $('#source-title').textContent = q.topic || 'Nguồn câu hỏi'; $('#slide-page').textContent = q.page ? ('SLIDE ' + q.page + (q.page_total ? ' / ' + q.page_total : '')) : 'SLIDE —'; $('#slide-title').textContent = q.title || '—'; $('#slide-text').textContent = (q.text || '').slice(0, 600); $('#transcript-code').textContent = 'Transcript · ' + (q.code || '—'); $('#transcript-text').textContent = '“' + (q.quote || q.text || '—') + '”'; $('#source-dialog').showModal() }
+        $('#cards').addEventListener('click', e => { const edit = e.target.closest('[data-edit]'); if (edit) { openEditor(+edit.dataset.edit); return } const a = e.target.closest('[data-answer]'), s = e.target.closest('[data-status]'), src = e.target.closest('[data-source]'); if (a) { const [id, i] = a.dataset.answer.split(',').map(Number); questions[id].selected = i; render() } if (s) { const [id, status] = s.dataset.status.split(','); if (questions[id].status === 'rejected' && status === 'pending' && questions.filter(q => q.status !== 'rejected').length >= targetCount) { notify('Bộ quiz đã đủ câu. Hãy loại một câu khác trước khi khôi phục.'); return } questions[id].status = status; render() } if (src) openSource(questions[+src.dataset.source]) });
+        $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x === b)); render() });
+        function updateCount(n) { count = Math.max(1, Math.min(8, n)); $('#count').textContent = count; $('#minus').disabled = count === 1; $('#plus').disabled = count === 8 }
+        $('#minus').onclick = () => updateCount(count - 1); $('#plus').onclick = () => updateCount(count + 1);
+        $('#levels').onclick = e => { const b = e.target.closest('button'); if (!b) return; level = b.dataset.level; document.querySelectorAll('[data-level]').forEach(x => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', x === b) }) };
+        function syncTopics() { document.querySelectorAll('[data-topic]').forEach(b => { const active = selectedTopics.has(b.dataset.topic); b.classList.toggle('active', active); b.setAttribute('aria-pressed', active); b.textContent = (active ? '✓  ' : '') + b.dataset.topic }) }
+        $('#topics').onclick = e => { const b = e.target.closest('button'); if (!b || !b.dataset.topic) return; const t = b.dataset.topic; if (selectedTopics.has(t)) selectedTopics.delete(t); else selectedTopics.add(t); $('#scope').value = 'custom'; const on = selectedTopics.has(t); b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); b.textContent = (on ? '✓  ' : '') + t + ' (' + (b.dataset.src || '?') + ' nguồn)' }; $('#scope').onchange = () => { if ($('#scope').value === 'all') { selectedTopics = new Set(); document.querySelectorAll('[data-topic]').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); b.textContent = b.dataset.topic + ' (' + (b.dataset.src || '?') + ' nguồn)' }); } };
+        function generateQuiz() { if (!selectedTopics.size) { notify('Chọn ít nhất một chủ đề để tạo quiz.'); return } return true }
+
+        $('#generate').onclick = () => {
+            if (isGenerating) return;
+            const scopeAll = $('#scope').value === 'all';
+            if (!scopeAll && !selectedTopics.size) { notify('Chọn ít nhất một chủ đề, hoặc đổi phạm vi thành "Tất cả chủ đề".'); return }
+            if (!activeGraphId) { notify('Chưa có tài liệu nào được phân tích. Hãy upload PDF/MD trước.'); return }
+            isGenerating = true; $('#path-panel').hidden = true;
+            const controls = Array.from(document.querySelectorAll('.builder button,.builder select,.results button'));
+            const previousStates = controls.map(control => [control, control.disabled]);
+            controls.forEach(control => control.disabled = true);
+            $('#generate').textContent = 'AI đang phân tích graph & sinh câu hỏi…'; render();
+            if (innerWidth < 701) $('.results').scrollIntoView({ behavior: 'smooth' });
+            // đồng hồ + timeout: không bao giờ loading vô hạn nữa
+            const t0 = Date.now();
+            const elapsedTimer = setInterval(() => { const el = $('#loading-elapsed'); if (el) el.textContent = Math.round((Date.now() - t0) / 1000) + 's' }, 500);
+            const abort = new AbortController();
+            const timeoutId = setTimeout(() => abort.abort(), 75000);
+            fetch('/api/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph_id: activeGraphId, count: count, level: level, topics: scopeAll ? [] : Array.from(selectedTopics), seed: Math.floor(Math.random() * 10000) }), signal: abort.signal })
+                .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.detail || 'Lỗi API') }); return r.json() })
+                .then(data => {
+                    questions = data.questions.map((q, i) => ({ ...q, id: i, status: 'pending', selected: null, bankKey: q.q }));
+                    targetCount = count; generationLevel = level; generationTopics = new Set(selectedTopics); generatedTopicCount = selectedTopics.size;
+                    skippedTopics = data.skipped || [];
+                    const note = $('#evidence-note');
+                    note.innerHTML = 'Pool đủ căn cứ: <b>' + data.n_pool + ' concept</b>' + (skippedTopics.length ? '<br>AI bỏ qua ' + skippedTopics.length + ' concept thiếu bằng chứng: ' + skippedTopics.slice(0, 5).join(', ') + (skippedTopics.length > 5 ? '…' : '') : '');
+                    tab = 'all'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === 'all'));
+                    $('#result-description').textContent = 'Vừa tạo · ' + questions.length + ' câu hỏi · ' + level;
+                    render();
+                    showPath('success', 'Bộ quiz đã sẵn sàng để duyệt', questions.length + ' câu được AI sinh từ knowledge graph (' + data.n_pool + ' concept đủ căn cứ, bốc theo seed ngẫu nhiên). Mỗi câu có trang slide/mã đoạn nguồn — Hãy kiểm tra trước khi xuất.');
+                    notify('Đã tạo ' + questions.length + '/' + count + ' câu từ graph thật.');
+                    if (innerWidth < 701) $('.results').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => { const msg = error.name === 'AbortError' ? 'Quá 75 giây không có phản hồi — có thể backend đã tắt hoặc mạng tới OpenAI bị gián đoạn.' : String(error.message || error); showPath('failure', 'Không thể tạo bộ quiz', msg + ' Kiểm tra: (1) terminal uvicorn còn chạy không, (2) F12 → Network xem request /api/quiz có gửi đi không.') })
+                .finally(() => { clearTimeout(timeoutId); clearInterval(elapsedTimer); isGenerating = false; previousStates.forEach(([control, disabled]) => control.disabled = disabled); $('#generate').textContent = 'Tạo thử thách →'; render() });
+        };
+
+        $('#export').onclick = () => { const approved = questions.filter(q => q.status === 'approved'); if (!approved.length) return; const blob = new Blob([JSON.stringify({ title: 'Khám phá mô hình ngôn ngữ', demo: true, questions: approved.map(q => ({ question: q.q, options: q.a, correctAnswer: q.a[q.correct], topic: q.topic, difficulty: q.level, source: { slide: q.page, transcript: q.code }, explanation: q.explain })) }, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'lessonleaf-quiz.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); notify('Đã xuất ' + approved.length + ' câu hỏi đã duyệt.') };
+
+        $('#refill').onclick = () => { if (!activeGraphId || isGenerating) return; const missing = Math.max(0, targetCount - questions.filter(q => q.status !== 'rejected').length); if (!missing) { notify('Bộ quiz đã đủ câu.'); return } isGenerating = true; render(); fetch('/api/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph_id: activeGraphId, count: missing, level: generationLevel, topics: Array.from(generationTopics), seed: Math.floor(Math.random() * 10000) }) }).then(r => r.json()).then(data => { const used = new Set(questions.map(q => q.bankKey || q.q)); const fresh = data.questions.filter(q => !used.has(q.q)); fresh.forEach(q => questions.push({ ...q, id: questions.length, status: 'pending', selected: null, bankKey: q.q })); tab = 'pending'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab)); render(); showPath('success', 'Đã xử lý yêu cầu bù câu hỏi', 'AI đã sinh thêm ' + fresh.length + ' câu mới từ knowledge graph; các câu bổ sung đang chờ duyệt.'); notify('Đã thêm ' + fresh.length + ' câu.') }).catch(() => notify('Không bù được câu hỏi — thử lại.')).finally(() => { isGenerating = false; render() }) };
+        function renderFiles() { const list = $('#added-files'); list.replaceChildren(); addedFiles.forEach((f, index) => { const row = document.createElement('div'); row.className = 'file'; const type = document.createElement('span'); type.className = 'file-icon txt'; type.textContent = f.name.split('.').pop().toUpperCase(); const details = document.createElement('div'); details.className = 'file-details'; const name = document.createElement('strong'); name.textContent = f.name; const meta = document.createElement('small'); meta.textContent = f._status === 'ready' ? ((f._n_nodes || '?') + ' concepts · ' + (f._cached ? 'cache (0 API)' : 'AI đã phân tích')) : (f._status === 'processing' ? 'AI đang phân tích graph… ' + (f._progress ? f._progress + '/' + (f._total || '?') + ' chunks' : '') : (f._status === 'error' ? ('Lỗi: ' + (f._error || '')) : 'Đang gửi…')); const remove = document.createElement('button'); remove.className = 'remove-file'; remove.textContent = '×'; remove.setAttribute('aria-label', 'Xóa ' + f.name); remove.onclick = () => { const wasActive = f._doc_id && f._doc_id === activeGraphId; if (f._doc_id) fetch('/api/doc/' + f._doc_id, { method: 'DELETE' }); addedFiles.splice(index, 1); renderFiles(); if (wasActive) { activeGraphId = null; selectedTopics.clear(); $('#topics').replaceChildren(); const ready = addedFiles.find(x => x._status === 'ready'); if (ready) { activeGraphId = ready._doc_id; } refreshDocs(); notify('Đã xóa tài liệu (kèm graph của nó).' + (activeGraphId ? ' Chuyển sang nguồn: ' + addedFiles.find(x => x._doc_id === activeGraphId).name : '')) } };; details.append(name, meta); row.append(type, details, remove); list.append(row) }) }
+        $('#add-files').onclick = () => $('#file-input').click();
+        function addFiles(files) { let added = 0, invalid = 0, duplicate = 0; for (const file of files) { if (!/\.(pdf|md|txt)$/i.test(file.name) || file.size > 20 * 1024 * 1024) { invalid++; continue } if (addedFiles.some(f => f.name === file.name && f.size === file.size)) { duplicate++; continue } addedFiles.push(file); added++; const fd = new FormData(); fd.append('file', file); fetch('/api/upload', { method: 'POST', body: fd }).then(r => r.json()).then(d => { file._doc_id = d.doc_id; file._status = 'processing'; renderFiles(); pollDoc(file, d.doc_id) }).catch(e => { file._status = 'error'; file._error = 'Không gửi được tới server'; renderFiles() }) } renderFiles(); notify([added ? 'Đã thêm ' + added + ' tài liệu — AI bắt đầu phân tích.' : '', invalid ? invalid + ' tệp sai định dạng hoặc vượt 20 MB.' : '', duplicate ? duplicate + ' tệp đã có trong danh sách.' : ''].filter(Boolean).join(' ') || 'Chưa chọn tài liệu.') }
+        function pollDoc(file, docId) { const timer = setInterval(() => { fetch('/api/docs').then(r => r.json()).then(docs => { const d = docs.find(x => x.doc_id === docId); if (!d) return; file._status = d.status; file._progress = d.progress; file._total = d.total; file._error = d.error; file._n_nodes = d.n_nodes; file._cached = d.from_cache; renderFiles(); if (d.status === 'ready') { clearInterval(timer); activeGraphId = docId; refreshTopics(); if (innerWidth < 701) {} notify('"' + file.name + '" đã sẵn sàng — graph ' + d.n_nodes + ' concepts. Đã chọn làm nguồn quiz.') } if (d.status === 'error') { clearInterval(timer); renderFiles() } }) }, 1500) }
+        function refreshDocs() { fetch('/api/docs').then(r => r.json()).then(docs => { addedFiles = docs.map(d => ({ name: d.name, size: 0, _doc_id: d.doc_id, _status: d.status, _progress: d.progress, _total: d.total, _error: d.error, _n_nodes: d.n_nodes, _cached: d.from_cache })); const ready = addedFiles.find(f => f._status === 'ready'); if (ready && !activeGraphId) activeGraphId = ready._doc_id; renderFiles(); refreshTopics() }) }
+        async function refreshTopics() { if (!activeGraphId) return; try { const g = await fetch('/api/graph/' + activeGraphId).then(r => r.json()); const concepts = g.nodes.filter(n => n.type === 'concept' && (n.quotes || []).length > 0); const top = concepts.sort((a, b) => (b.sources || []).length - (a.sources || []).length).slice(0, 10); const box = $('#topics'); box.replaceChildren(); top.forEach(n => { const b = document.createElement('button'); b.className = 'topic'; b.dataset.topic = n.name; b.dataset.src = (n.sources || []).length; b.textContent = n.name + ' (' + (n.sources || []).length + ' nguồn)'; box.append(b) }); $('#kg-badge').innerHTML = '<span class="dot"></span>Knowledge Graph · ' + g.nodes.length + ' nodes / ' + g.edges.length + ' cạnh'; const note = $('#evidence-note'); note.innerHTML = 'Pool đủ căn cứ: <b>' + concepts.length + ' concept</b> (có quote + nguồn). AI chỉ sinh câu hỏi từ các concept này.'; } catch (e) {} }
+        $('#file-input').onchange = e => { addFiles(Array.from(e.target.files)); e.target.value = '' };
+
+
+        function openEditor(id) { const q = questions[id]; editingId = id; $('#edit-question').value = q.q; q.a.forEach((a, i) => $('#edit-option-' + i).value = a); $('#edit-correct').value = String(q.correct); $('#edit-explanation').value = q.explain; $('#edit-source').textContent = 'Nguồn giữ nguyên: Slide ' + q.page + ' · ' + q.code; $('#edit-error').textContent = ''; $('#edit-dialog').showModal() }
+        function closeEditor() { $('#edit-dialog').close(); editingId = null }
+        $('#edit-close').onclick = closeEditor; $('#edit-cancel').onclick = closeEditor;
+        $('#edit-form').onsubmit = e => { e.preventDefault(); if (editingId === null) return; const text = $('#edit-question').value.trim(), options = [0, 1, 2, 3].map(i => $('#edit-option-' + i).value.trim()), explanation = $('#edit-explanation').value.trim(), correct = Number($('#edit-correct').value); if (!text || options.some(a => !a) || !explanation) { $('#edit-error').textContent = 'Vui lòng điền câu hỏi, đủ 4 phương án và giải thích.'; return } if (new Set(options.map(a => a.toLocaleLowerCase('vi'))).size !== 4) { $('#edit-error').textContent = 'Bốn phương án phải khác nhau.'; return } if (!Number.isInteger(correct) || correct < 0 || correct > 3) { $('#edit-error').textContent = 'Chọn một đáp án đúng từ A đến D.'; return } const q = questions[editingId]; q.q = text; q.a = options; q.correct = correct; q.explain = explanation; q.edited = true; q.status = 'pending'; q.selected = null; closeEditor(); tab = 'pending'; document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab)); render(); showPath('correction', 'Đã lưu chỉnh sửa — cần duyệt lại', 'Câu hỏi đã trở về Chờ duyệt và không được xuất cho đến khi giảng viên duyệt lại. Nguồn tham chiếu được giữ nguyên; nội dung sửa chưa được tự động xác minh.'); };
+        $('#path-supported').onclick = () => { const ready = addedFiles.filter(f => f._status === 'ready'); if (!ready.length) { notify('Chưa có tài liệu nào được phân tích.'); return } activeGraphId = ready[0]._doc_id; refreshTopics(); showPath('success', 'Đã chuyển về graph tài liệu thật', 'Bấm Tạo thử thách để tạo bộ quiz mới từ knowledge graph của tài liệu này.') };
+        $('#path-upload').onclick = () => $('#file-input').click();
+
+        $('#source-dialog .close').onclick = () => $('#source-dialog').close(); $('#source-dialog').onclick = e => { if (e.target === $('#source-dialog')) { const r = e.target.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) e.target.close() } };
+        // Khởi động: nạp docs đã phân tích từ server (cache giữ nguyên giữa các phiên)
+        refreshDocs(); render();
+    </script>
+</body>
+
+</html>

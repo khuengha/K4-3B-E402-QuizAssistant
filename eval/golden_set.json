@@ -1,0 +1,419 @@
+{
+ "meta": {
+  "n_cases": 30,
+  "seed": 2026,
+  "task": "Điền label OK nếu quote thật sự hỗ trợ definition của node, BAD nếu không. Gắn nhãn độc lập bởi 2 người."
+ },
+ "cases": [
+  {
+   "case_id": "g01",
+   "node": "điểm nghẽn",
+   "definition": "Bottleneck là điểm nghẽn trong quy trình làm việc, nơi mà hiệu suất bị giảm do một yếu tố nào đó.",
+   "quote": "điểm nghẽn thực tế",
+   "source": {
+    "file": "d2-slide-hackathon.pdf",
+    "page": 7
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g02",
+   "node": "tối ưu chi phí",
+   "definition": "Tối ưu chi phí là quá trình cải thiện hiệu suất của mô hình trong khi giảm thiểu tài nguyên sử dụng.",
+   "quote": "phải chắt lọc được thông tin có ý nghĩa hơn, tối ưu được về mặt chi phí.",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-081",
+    "section": "Benchmark năng lực và xu hướng chi phí tính toán"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g03",
+   "node": "đồng cảm",
+   "definition": "Đồng cảm là quá trình hiểu người dùng để xác định các vấn đề của họ.",
+   "quote": "Đồng cảm là bước mình cố gắng hiểu người dùng để xác định được các vấn đề",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-084",
+    "section": "Vòng lặp HCD và bài tập cá nhân"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g04",
+   "node": "quan sát thực tế",
+   "definition": "Phương pháp thu thập thông tin bằng cách theo dõi và ghi nhận hành vi, sự kiện trong môi trường thực tế.",
+   "quote": "Quan sát thực tế (Observation)",
+   "source": {
+    "file": "d2-slide-hackathon.pdf",
+    "page": 4
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g05",
+   "node": "nợ kỹ thuật",
+   "definition": "Nợ kỹ thuật là những vấn đề phát sinh trong quá trình phát triển phần mềm mà cần phải được giải quyết để duy trì và cải thiện hệ thống.",
+   "quote": "đống nợ kỹ thuật phải đi xử lý lại",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-029",
+    "section": "Lịch sử AI: Turing test và hai mùa đông"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g06",
+   "node": "insight",
+   "definition": "Insight là sự hiểu biết sâu sắc về một vấn đề, giúp đưa ra quyết định chính xác hơn.",
+   "quote": "khai thác ra cái insight thực sự phía sau.",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-030",
+    "section": "Từ đề bài mơ hồ đến vấn đề thực sự"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g07",
+   "node": "high impact",
+   "definition": "High impact đề cập đến những nhiệm vụ hoặc hoạt động có tác động lớn đến kết quả cuối cùng.",
+   "quote": "những cái high impact và low effort",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-079",
+    "section": "Ma trận tác động – nỗ lực (impact-effort matrix)"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g08",
+   "node": "Slack",
+   "definition": "Slack là một công cụ chat nội bộ được phát triển để đáp ứng nhu cầu của chính đội ngũ phát triển.",
+   "quote": "Slack ban đầu chỉ là chat nội bộ đúng không — họ cần một công cụ chat nội bộ nên họ xây ra",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-042",
+    "section": "Bài tập: bài toán trợ giảng cho lớp 1000 học viên"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g09",
+   "node": "hệ thống transformer",
+   "definition": "Hệ thống mạng neuron được thiết kế để xử lý các bài toán như dịch máy, với khả năng xử lý đồng thời các từ trong câu.",
+   "quote": "cách hệ thống transformer hoạt động",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-039",
+    "section": "AlphaGo và kiến trúc Transformer"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g10",
+   "node": "Deep Learning",
+   "definition": "Phương pháp thuộc Machine Learning sử dụng các mạng nơ-ron nhiều tầng để tự động học các đặc trưng từ dữ liệu.",
+   "quote": "Deep learning — mạng nơ-ron nhiều tầng tự học đặc trưng.",
+   "source": {
+    "file": "d1-slide-hackathon.pdf",
+    "page": 3
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g11",
+   "node": "việc khó nhất",
+   "definition": "Các nhiệm vụ phức tạp yêu cầu suy luận nhiều bước và độ tin cậy cao.",
+   "quote": "Việc khó nhất",
+   "source": {
+    "file": "d1-slide-hackathon.pdf",
+    "page": 26
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g12",
+   "node": "giải pháp AI",
+   "definition": "Phương pháp hoặc công nghệ sử dụng trí tuệ nhân tạo để giải quyết một vấn đề cụ thể.",
+   "quote": "Giải pháp AI",
+   "source": {
+    "file": "d2-slide-hackathon.pdf",
+    "page": 5
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g13",
+   "node": "nền tảng",
+   "definition": "Nền tảng trong ngữ cảnh này đề cập đến cơ sở hạ tầng và kiến thức cần thiết để phát triển mô hình học máy.",
+   "quote": "cái nền tảng để cho mô hình có thể phát triển lên",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-063",
+    "section": "Tham số, RLHF và ngành gán nhãn dữ liệu"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g14",
+   "node": "Double Diamond",
+   "definition": "Mô hình thiết kế gồm hai giai đoạn chính: khám phá vấn đề và phát triển giải pháp.",
+   "quote": "Mô hình Double Diamond — Don Norman / British Design Council (2005)",
+   "source": {
+    "file": "d2-slide-hackathon.pdf",
+    "page": 3
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g15",
+   "node": "solution discovery",
+   "definition": "Khám phá giải pháp là giai đoạn tiếp theo sau khi đã xác định được vấn đề, nhằm tìm ra các giải pháp khả thi.",
+   "quote": "khám phá giải pháp",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-049",
+    "section": "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g16",
+   "node": "Lịch sử AI",
+   "definition": "Quá trình phát triển của trí tuệ nhân tạo kéo dài khoảng 70 năm từ khi khai sinh.",
+   "quote": "Lịch sử AI 70 năm",
+   "source": {
+    "file": "d1-slide-hackathon.pdf",
+    "page": 5
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g17",
+   "node": "thị trường gọi vốn",
+   "definition": "Thị trường gọi vốn là nơi các công ty tìm kiếm nguồn vốn đầu tư để phát triển sản phẩm hoặc dịch vụ của mình.",
+   "quote": "thời điểm chững lại của thị trường gọi vốn trong ngành AI",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-080",
+    "section": "Làn sóng mã nguồn mở Trung Quốc và khoảnh khắc DeepSeek"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g18",
+   "node": "trí thông minh nhân tạo",
+   "definition": "Trí thông minh nhân tạo là khả năng của máy móc trong việc mô phỏng trí thông minh của con người.",
+   "quote": "nếu trí thông minh có thể được mô tả đủ rõ, thì máy móc cũng có thể mô phỏng được.",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-024",
+    "section": "Lịch sử AI: Turing test và hai mùa đông"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g19",
+   "node": "cạnh tranh",
+   "definition": "Cạnh tranh trong ngữ cảnh này đề cập đến sự đấu tranh giữa các sản phẩm hoặc dịch vụ để thu hút sự chú ý và sự lựa chọn của người dùng.",
+   "quote": "cuộc chiến là làm thế nào để sản phẩm của bạn giành được sự chú ý của những người khác — cạnh tranh sẽ càng ngày càng cao.",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-020",
+    "section": "Phát triển sản phẩm AI có gì khác"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g20",
+   "node": "chưng cất mô hình",
+   "definition": "Chưng cất mô hình là kỹ thuật học từ các mô hình lớn để rút ra quy luật và cách suy luận mà không cần xây dựng nền tảng từ đầu.",
+   "quote": "Chưng cất từ mô hình lớn ở đây có nghĩa là khi một mô hình lớn ra đời và ai cũng có thể truy cập được",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-044",
+    "section": "Cuộc đua AI sau ChatGPT"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g21",
+   "node": "công nghệ",
+   "definition": "Công nghệ là công cụ được phát triển để giải quyết các vấn đề cụ thể.",
+   "quote": "công nghệ sinh ra để giải quyết một vấn đề gì đấy",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-004",
+    "section": "Kỹ năng xác định bài toán từ yêu cầu mơ hồ"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g22",
+   "node": "hình chữ T",
+   "definition": "Hình chữ T mô tả một người có chuyên môn sâu trong một lĩnh vực nhưng cũng có kiến thức rộng về các lĩnh vực khác.",
+   "quote": "họ vẫn phát triển theo hình chữ T: vẫn rất mạnh một lĩnh vực nào đấy nhưng biết những phần còn lại.",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-007",
+    "section": "Product manager, project manager và văn hoá làm product"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g23",
+   "node": "remote work",
+   "definition": "Remote work là hình thức làm việc mà nhân viên không cần phải có mặt tại văn phòng, có thể làm việc từ bất kỳ đâu.",
+   "quote": "người miền Nam mình thấy thường mở hơn, người miền Bắc thì hơi đóng, tính hơi phòng vệ.",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-014",
+    "section": "Product manager, project manager và văn hoá làm product"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g24",
+   "node": "memory",
+   "definition": "Memory là bộ nhớ ghi lại các bước mà agent đã thực hiện trong quá trình hoạt động.",
+   "quote": "sổ tay ghi nhớ các bước",
+   "source": {
+    "file": "d1-slide-hackathon.pdf",
+    "page": 24
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g25",
+   "node": "vòng lặp đúng",
+   "definition": "Vòng lặp đúng trong sinh văn bản autoregressive của LLM bao gồm các bước predict, append và rerun.",
+   "quote": "Vòng lặp đúng trong sinh văn bản autoregressive của LLM: predict, append và rerun.",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-096",
+    "section": "Tương tác cuối buổi"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g26",
+   "node": "Context bổ sung",
+   "definition": "Lớp thứ ba trong một prompt, cung cấp thông tin bổ sung như tài liệu hoặc lịch sử chat để hỗ trợ mô hình.",
+   "quote": "Tài liệu, lịch sử chat, dữ liệu tra sổ",
+   "source": {
+    "file": "d1-slide-hackathon.pdf",
+    "page": 28
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g27",
+   "node": "bàn cờ",
+   "definition": "Bàn cờ là bề mặt chơi của các trò chơi cờ, thường được chia thành các ô vuông để người chơi đặt quân cờ.",
+   "quote": "dựng được cái bàn cờ ở bên trong đầu nó",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-064",
+    "section": "Thí nghiệm bàn cờ, giới hạn kiến thức và các mức tiếp cận mô hình"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g28",
+   "node": "chi phí chìm",
+   "definition": "Chi phí chìm là những chi phí đã bỏ ra mà không thể thu hồi, ảnh hưởng đến quyết định tiếp theo của con người.",
+   "quote": "có một loại chi phí gọi là chi phí chìm — sunk cost",
+   "source": {
+    "file": "transcript-Day 2.md",
+    "turn": "T01-060",
+    "section": "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g29",
+   "node": "dự đoán",
+   "definition": "Hành động đoán trước sự kiện sắp xảy ra để có thể chuẩn bị phản ứng thích hợp.",
+   "quote": "Đoán trước sự kiện sắp xảy ra để chuẩn bị phản ứng.",
+   "source": {
+    "file": "d2-slide-hackathon.pdf",
+    "page": 14
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  },
+  {
+   "case_id": "g30",
+   "node": "tốc độ phát triển",
+   "definition": "Tốc độ thay đổi và tiến bộ trong lĩnh vực công nghệ, đặc biệt là trong AI, có thể rất nhanh chóng.",
+   "quote": "Tốc độ đi rất nhanh.",
+   "source": {
+    "file": "transcript-Day 1.md",
+    "turn": "T04-077",
+    "section": "Bức tranh thị trường mô hình và tốc độ thay đổi"
+   },
+   "label": "",
+   "label_by": "",
+   "note": ""
+  }
+ ]
+}

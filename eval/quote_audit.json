@@ -1,0 +1,159 @@
+{
+ "concept_quote_verbatim": {
+  "exact": 745,
+  "near_match": 99,
+  "mismatch": 8,
+  "pct_exact": 87.4,
+  "pct_supported": 99.1
+ },
+ "edge_quote_verbatim": {
+  "exact": 498,
+  "near_match": 82,
+  "mismatch": 20,
+  "pct_exact": 83.0,
+  "pct_supported": 96.7
+ },
+ "failure_detail": [
+  {
+   "chunk_id": "D1-p05",
+   "kind": "edge",
+   "quote": "Lịch sử AI 70 năm... 2 lần mùa đông"
+  },
+  {
+   "chunk_id": "D1-p07",
+   "kind": "concept",
+   "quote": "ImageNet — cuộc cách mạng của dữ liệu — 14 triệu ảnh được gán nhãn tay, hơn 20.000 loại vật."
+  },
+  {
+   "chunk_id": "D1-p12",
+   "kind": "edge",
+   "quote": "Sinh văn bản = đoán → nối vào câu → đoán tiếp ... vòng lặp predict → append → rerun"
+  },
+  {
+   "chunk_id": "D1-p16",
+   "kind": "concept",
+   "quote": "quản context = quản sự chú ý. Context rác = attention rác."
+  },
+  {
+   "chunk_id": "D1-p17",
+   "kind": "edge",
+   "quote": "mọi token đều đi qua toàn bộ khớp nối (dense) [đối lập với] mỗi token chỉ gọi vài chuyên gia (MoE)"
+  },
+  {
+   "chunk_id": "D1-p19",
+   "kind": "edge",
+   "quote": "Người chấm xếp hạng... REWARD MODEL máy chấm điểm thay người... Huấn luyện theo điểm"
+  },
+  {
+   "chunk_id": "D1-p21",
+   "kind": "edge",
+   "quote": "Ba “đường tắt” (spurious cues) trên do chính LLM tự động phát hiện... trên quy mô 675 bài toán thật của benchmark OpenD5."
+  },
+  {
+   "chunk_id": "D2-p11",
+   "kind": "edge",
+   "quote": "Mục tiêu kỳ vọng cải thiện ở mức độ nào, với ngưỡng cụ thể."
+  },
+  {
+   "chunk_id": "D2-p13",
+   "kind": "concept",
+   "quote": "Định nghĩa 'đúng/sai' của hệ thống"
+  },
+  {
+   "chunk_id": "D2-p14",
+   "kind": "concept",
+   "quote": "Tám trường hợp PAIR gọi là 'AI probably better'"
+  },
+  {
+   "chunk_id": "D2-p19",
+   "kind": "concept",
+   "quote": "CẤP ĐỘ 1 — R U L E ( L UẬT T Ĩ N H )"
+  },
+  {
+   "chunk_id": "D2-p28",
+   "kind": "edge",
+   "quote": "Quyết định 'No-Go' khi AI không mang giá trị vượt trội"
+  },
+  {
+   "chunk_id": "T1-T04-013",
+   "kind": "edge",
+   "quote": "các bạn phải là các data scientist, phải rất giỏi toán, phải ngồi training model"
+  },
+  {
+   "chunk_id": "T1-T04-014",
+   "kind": "edge",
+   "quote": "một quiz ngắn để mọi người chơi vui trên Kahoot với nhau; ... và sáng ngày mai chúng ta sẽ làm một bài lab"
+  },
+  {
+   "chunk_id": "T1-T04-029",
+   "kind": "edge",
+   "quote": "đống nợ kỹ thuật phải đi xử lý lại — Đấy là lý do nó không thể tồn tại được lâu"
+  },
+  {
+   "chunk_id": "T1-T04-036",
+   "kind": "concept",
+   "quote": "Nước đi số 37 là một nước đi khiến cho Lee Sedol... không thể hiểu nổi vì sao nó lại có thể đi được nước đấy."
+  },
+  {
+   "chunk_id": "T1-T04-036",
+   "kind": "edge",
+   "quote": "Nước đi số 37 là một nước đi khiến cho Lee Sedol... không thể hiểu nổi vì sao nó lại có thể đi được nước đấy."
+  },
+  {
+   "chunk_id": "T1-T04-058",
+   "kind": "edge",
+   "quote": "Tham số là các yếu tố mà mô hình sử dụng để học và thực hiện các tác vụ."
+  },
+  {
+   "chunk_id": "T1-T04-058",
+   "kind": "edge",
+   "quote": "Mô hình là một cấu trúc toán học hoặc thuật toán được sử dụng để thực hiện các tác vụ."
+  },
+  {
+   "chunk_id": "T1-T04-058",
+   "kind": "edge",
+   "quote": "Mô hình mã nguồn mở là các mô hình mà người dùng có thể tải về."
+  },
+  {
+   "chunk_id": "T1-T04-063",
+   "kind": "concept",
+   "quote": "team làm learning"
+  },
+  {
+   "chunk_id": "T1-T04-068",
+   "kind": "concept",
+   "quote": "Bạn sẽ càng phải đối diện với một sự phức tạp hơn... xài các công cụ coding assistant."
+  },
+  {
+   "chunk_id": "T1-T04-094",
+   "kind": "edge",
+   "quote": "LSTM giúp xử lý tốt hơn các vấn đề về long-term dependency."
+  },
+  {
+   "chunk_id": "T2-T01-004",
+   "kind": "edge",
+   "quote": "các lãnh đạo thường xuyên kiểu 'bây giờ anh phải làm một cái AI support'"
+  },
+  {
+   "chunk_id": "T2-T01-009",
+   "kind": "edge",
+   "quote": "Project thì kiểu một dự án tạo ra xong rồi là xong luôn, còn sản phẩm thì người ta hiểu là đứa con của người ta"
+  },
+  {
+   "chunk_id": "T2-T01-070",
+   "kind": "edge",
+   "quote": "bạn cũng hoàn toàn có thể bảo AI — cú pháp của mình luôn là: việc gì mình cũng bảo 'cho mình khoảng ba option và phân tích các option đấy' để mình quyết định."
+  },
+  {
+   "chunk_id": "T2-T01-083",
+   "kind": "edge",
+   "quote": "nếu người dùng bảo 'cái này thực ra tôi không cần'."
+  },
+  {
+   "chunk_id": "T2-T01-086",
+   "kind": "edge",
+   "quote": "Sự tò mò là động lực thúc đẩy con người đặt ra những câu hỏi và khám phá những ý tưởng mới."
+  }
+ ],
+ "method": "exact = chuỗi con nguyên văn (sau chuẩn hóa); near = >=60% quote nằm trong 1 span chung với nguồn; mismatch = còn lại"
+}

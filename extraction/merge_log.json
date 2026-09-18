@@ -1,0 +1,537 @@
+{
+ "layer1_exact": 531,
+ "layer2_candidates": [
+  {
+   "a": "LLM",
+   "b": "LLMs",
+   "sim": 0.86
+  },
+  {
+   "a": "AI Agent",
+   "b": "ImageNet",
+   "sim": 0.75
+  },
+  {
+   "a": "Mùa đông AI",
+   "b": "làn sóng AI",
+   "sim": 0.76
+  },
+  {
+   "a": "Hệ thống AI",
+   "b": "thị trường AI",
+   "sim": 0.75
+  },
+  {
+   "a": "Hệ chuyên gia",
+   "b": "chuyên gia",
+   "sim": 0.87
+  },
+  {
+   "a": "Trí tuệ tổng quát",
+   "b": "trí tuệ nhân tạo tổng quát",
+   "sim": 0.79
+  },
+  {
+   "a": "Transformer",
+   "b": "Transformers",
+   "sim": 0.96
+  },
+  {
+   "a": "GPT",
+   "b": "GPT-3",
+   "sim": 0.75
+  },
+  {
+   "a": "GPT",
+   "b": "GPT-2",
+   "sim": 0.75
+  },
+  {
+   "a": "Chatbot",
+   "b": "AI chatbot",
+   "sim": 0.82
+  },
+  {
+   "a": "MoE",
+   "b": "model",
+   "sim": 0.75
+  },
+  {
+   "a": "Context",
+   "b": "context rot",
+   "sim": 0.78
+  },
+  {
+   "a": "Prompt engineering",
+   "b": "AI Engineering",
+   "sim": 0.75
+  },
+  {
+   "a": "bài toán",
+   "b": "bài toán AI",
+   "sim": 0.84
+  },
+  {
+   "a": "reasoning model",
+   "b": "reasoning",
+   "sim": 0.75
+  },
+  {
+   "a": "reasoning model",
+   "b": "training model",
+   "sim": 0.83
+  },
+  {
+   "a": "năng lực",
+   "b": "năng lực AI",
+   "sim": 0.84
+  },
+  {
+   "a": "năng lực",
+   "b": "nhân lực",
+   "sim": 0.88
+  },
+  {
+   "a": "tools",
+   "b": "tool",
+   "sim": 0.89
+  },
+  {
+   "a": "tầng model",
+   "b": "training model",
+   "sim": 0.83
+  },
+  {
+   "a": "Chi phí",
+   "b": "chi phí sai",
+   "sim": 0.78
+  },
+  {
+   "a": "top_p",
+   "b": "top-k",
+   "sim": 0.8
+  },
+  {
+   "a": "bài toán cho AI",
+   "b": "bài toán AI",
+   "sim": 0.85
+  },
+  {
+   "a": "phát triển giải pháp",
+   "b": "triển khai giải pháp",
+   "sim": 0.75
+  },
+  {
+   "a": "phát triển giải pháp",
+   "b": "phát triển sản phẩm AI",
+   "sim": 0.76
+  },
+  {
+   "a": "phát triển giải pháp",
+   "b": "ưu tiên giải pháp",
+   "sim": 0.81
+  },
+  {
+   "a": "triển khai giải pháp",
+   "b": "ưu tiên giải pháp",
+   "sim": 0.76
+  },
+  {
+   "a": "phỏng vấn người dùng",
+   "b": "phản hồi người dùng",
+   "sim": 0.77
+  },
+  {
+   "a": "phát biểu bài toán",
+   "b": "nhận diện bài toán",
+   "sim": 0.78
+  },
+  {
+   "a": "thị trường",
+   "b": "thị trường AI",
+   "sim": 0.87
+  },
+  {
+   "a": "thị trường",
+   "b": "đối tượng",
+   "sim": 0.78
+  },
+  {
+   "a": "giải pháp AI",
+   "b": "giải pháp",
+   "sim": 0.86
+  },
+  {
+   "a": "điểm đau người dùng",
+   "b": "yêu cầu của người dùng",
+   "sim": 0.77
+  },
+  {
+   "a": "điểm đau người dùng",
+   "b": "thấu hiểu người dùng",
+   "sim": 0.76
+  },
+  {
+   "a": "quy trình hiện tại",
+   "b": "quy trình thiết kế",
+   "sim": 0.78
+  },
+  {
+   "a": "SLA",
+   "b": "Slack",
+   "sim": 0.75
+  },
+  {
+   "a": "Output Metric",
+   "b": "Input Metrics",
+   "sim": 0.77
+  },
+  {
+   "a": "Tự động hóa",
+   "b": "tự động tóm tắt",
+   "sim": 0.75
+  },
+  {
+   "a": "dự đoán",
+   "b": "Dự án",
+   "sim": 0.91
+  },
+  {
+   "a": "AI probably better",
+   "b": "AI probably NOT better",
+   "sim": 0.9
+  },
+  {
+   "a": "chi phí sai",
+   "b": "chi phí chìm",
+   "sim": 0.78
+  },
+  {
+   "a": "Mô hình",
+   "b": "mô hình AI",
+   "sim": 0.82
+  },
+  {
+   "a": "Mô hình",
+   "b": "mô hình lớn",
+   "sim": 0.78
+  },
+  {
+   "a": "Mô hình",
+   "b": "mô hình đóng",
+   "sim": 0.78
+  },
+  {
+   "a": "Mô hình",
+   "b": "giá mô hình",
+   "sim": 0.78
+  },
+  {
+   "a": "Mô hình",
+   "b": "mô hình LLM",
+   "sim": 0.78
+  },
+  {
+   "a": "Công cụ",
+   "b": "công cụ AI",
+   "sim": 0.82
+  },
+  {
+   "a": "Cây quyết định",
+   "b": "quyết định",
+   "sim": 0.82
+  },
+  {
+   "a": "tính năng AI",
+   "b": "tính năng",
+   "sim": 0.86
+  },
+  {
+   "a": "Impact",
+   "b": "low impact",
+   "sim": 0.75
+  },
+  {
+   "a": "dữ liệu",
+   "b": "bộ dữ liệu",
+   "sim": 0.82
+  },
+  {
+   "a": "dữ liệu",
+   "b": "tập dữ liệu",
+   "sim": 0.78
+  },
+  {
+   "a": "mùa đông công nghệ",
+   "b": "công ty công nghệ",
+   "sim": 0.76
+  },
+  {
+   "a": "mô hình AI",
+   "b": "mô hình lớn",
+   "sim": 0.76
+  },
+  {
+   "a": "mô hình AI",
+   "b": "mô hình đóng",
+   "sim": 0.76
+  },
+  {
+   "a": "mô hình AI",
+   "b": "mô hình coding",
+   "sim": 0.75
+  },
+  {
+   "a": "mô hình AI",
+   "b": "mô hình LLM",
+   "sim": 0.76
+  },
+  {
+   "a": "tri thức",
+   "b": "tri thức ẩn",
+   "sim": 0.84
+  },
+  {
+   "a": "đặc trưng",
+   "b": "ảo tưởng",
+   "sim": 0.75
+  },
+  {
+   "a": "bộ dữ liệu",
+   "b": "học từ dữ liệu",
+   "sim": 0.75
+  },
+  {
+   "a": "bộ dữ liệu",
+   "b": "tập dữ liệu",
+   "sim": 0.76
+  },
+  {
+   "a": "kiến trúc",
+   "b": "kiến thức",
+   "sim": 0.89
+  },
+  {
+   "a": "mô hình lớn",
+   "b": "mô hình đóng",
+   "sim": 0.91
+  },
+  {
+   "a": "mô hình lớn",
+   "b": "mô hình coding",
+   "sim": 0.8
+  },
+  {
+   "a": "mô hình lớn",
+   "b": "mô hình LLM",
+   "sim": 0.82
+  },
+  {
+   "a": "thiết kế hệ thống tự học",
+   "b": "hệ thống tự học",
+   "sim": 0.77
+  },
+  {
+   "a": "thí nghiệm",
+   "b": "kinh nghiệm",
+   "sim": 0.76
+  },
+  {
+   "a": "học vẹt",
+   "b": "học viên",
+   "sim": 0.8
+  },
+  {
+   "a": "debug",
+   "b": "bug",
+   "sim": 0.75
+  },
+  {
+   "a": "mô hình đóng",
+   "b": "mô hình coding",
+   "sim": 0.88
+  },
+  {
+   "a": "tối ưu hóa",
+   "b": "tối ưu",
+   "sim": 0.75
+  },
+  {
+   "a": "thị trường gọi vốn",
+   "b": "thị trường AI",
+   "sim": 0.77
+  },
+  {
+   "a": "kiến thức",
+   "b": "kiểm thử",
+   "sim": 0.82
+  },
+  {
+   "a": "AI engineer",
+   "b": "AI Engineering",
+   "sim": 0.88
+  },
+  {
+   "a": "công nghệ",
+   "b": "cộng đồng",
+   "sim": 0.82
+  },
+  {
+   "a": "product owner",
+   "b": "product manager",
+   "sim": 0.79
+  },
+  {
+   "a": "product owner",
+   "b": "production",
+   "sim": 0.78
+  },
+  {
+   "a": "product manager",
+   "b": "project manager",
+   "sim": 0.87
+  },
+  {
+   "a": "Sản phẩm",
+   "b": "sản phẩm AI",
+   "sim": 0.84
+  },
+  {
+   "a": "Sản phẩm",
+   "b": "sản phẩm tốt",
+   "sim": 0.8
+  },
+  {
+   "a": "tư duy nhanh",
+   "b": "tư duy chậm",
+   "sim": 0.78
+  },
+  {
+   "a": "tư duy hệ thống",
+   "b": "nhật ký hệ thống",
+   "sim": 0.77
+  },
+  {
+   "a": "nguyên lý phát triển sản phẩm",
+   "b": "quy trình phát triển sản phẩm",
+   "sim": 0.79
+  },
+  {
+   "a": "sản phẩm AI",
+   "b": "sản phẩm tốt",
+   "sim": 0.78
+  },
+  {
+   "a": "trải nghiệm người dùng với AI",
+   "b": "trải nghiệm người dùng",
+   "sim": 0.86
+  },
+  {
+   "a": "chi phí chuyển đổi",
+   "b": "chi phí chìm",
+   "sim": 0.76
+  },
+  {
+   "a": "trải nghiệm người dùng",
+   "b": "thấu hiểu người dùng",
+   "sim": 0.81
+  },
+  {
+   "a": "thấu hiểu người dùng",
+   "b": "phản hồi người dùng",
+   "sim": 0.82
+  },
+  {
+   "a": "đối tượng",
+   "b": "ảo tưởng",
+   "sim": 0.88
+  },
+  {
+   "a": "trợ lý ảo",
+   "b": "trợ lý AI",
+   "sim": 0.89
+  },
+  {
+   "a": "trợ lý ảo",
+   "b": "trợ lý",
+   "sim": 0.8
+  },
+  {
+   "a": "nhận định vấn đề",
+   "b": "xác định vấn đề",
+   "sim": 0.81
+  },
+  {
+   "a": "First Principle Thinking",
+   "b": "first principle",
+   "sim": 0.77
+  },
+  {
+   "a": "hội tụ",
+   "b": "pha hội tụ",
+   "sim": 0.75
+  },
+  {
+   "a": "ma trận tác động và nỗ lực",
+   "b": "ma trận tác động – nỗ lực",
+   "sim": 0.94
+  },
+  {
+   "a": "kiểm chứng",
+   "b": "kiểm thử",
+   "sim": 0.78
+  }
+ ],
+ "layer2_merged": [
+  {
+   "kept": "LLM",
+   "merged_away": "LLMs",
+   "reason": "LLM và LLMs đều chỉ cùng một khái niệm là 'large language model', chỉ khác nhau ở số nhiều."
+  },
+  {
+   "kept": "Trí tuệ tổng quát",
+   "merged_away": "trí tuệ nhân tạo tổng quát",
+   "reason": "Cả hai tên đều chỉ cùng một khái niệm về trí tuệ nhân tạo có khả năng thực hiện các nhiệm vụ tương tự như con người."
+  },
+  {
+   "kept": "Transformer",
+   "merged_away": "Transformers",
+   "reason": "Both terms refer to the same underlying architecture in machine learning, specifically in the context of neural networks for natural language processing."
+  },
+  {
+   "kept": "GPT",
+   "merged_away": "GPT-3",
+   "reason": "GPT-3 là một phiên bản cụ thể của GPT, do đó chúng chỉ cùng một khái niệm."
+  },
+  {
+   "kept": "Chatbot",
+   "merged_away": "AI chatbot",
+   "reason": "Both terms refer to the same concept of a chatbot that utilizes artificial intelligence."
+  },
+  {
+   "kept": "bộ dữ liệu",
+   "merged_away": "tập dữ liệu",
+   "reason": "Bộ dữ liệu và tập dữ liệu đều chỉ đến một khái niệm tương tự nhau trong ngữ cảnh khoa học dữ liệu, thường được sử dụng để chỉ một tập hợp các thông tin được tổ chức để phân tích."
+  },
+  {
+   "kept": "mô hình lớn",
+   "merged_away": "mô hình LLM",
+   "reason": "Mô hình LLM là viết tắt của 'mô hình lớn', do đó chúng chỉ cùng một khái niệm."
+  },
+  {
+   "kept": "trợ lý ảo",
+   "merged_away": "trợ lý AI",
+   "reason": "Cả hai tên khái niệm đều chỉ đến cùng một loại công nghệ, đó là các hệ thống hỗ trợ người dùng thông qua trí tuệ nhân tạo."
+  },
+  {
+   "kept": "First Principle Thinking",
+   "merged_away": "first principle",
+   "reason": "Both terms refer to the same concept of breaking down complex problems into their most basic elements."
+  },
+  {
+   "kept": "ma trận tác động và nỗ lực",
+   "merged_away": "ma trận tác động – nỗ lực",
+   "reason": "Cả hai tên khái niệm đều chỉ cùng một đối tượng, chỉ khác nhau về cách diễn đạt (dấu gạch nối) nhưng không làm thay đổi ý nghĩa."
+  }
+ ]
+}
