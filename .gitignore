@@ -1,2 +1,5 @@
-.env
-appdata/
+__pycache__/
+*.py[cod]
+
+/image.png
+/Số tay Hackathon K4 - Dành cho học viên.pdf
