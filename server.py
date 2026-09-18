@@ -29,6 +29,14 @@ def text(value, limit=2000):
     return value
 
 
+def question_source(question):
+    source = dict(slide=question.get('page'), transcript=question.get('code'))
+    for key, field in [('file', 'source_file'), ('doc_id', 'source_doc_id'), ('quote', 'quote')]:
+        if question.get(field) is not None:
+            source[key] = question[field]
+    return source
+
+
 class QuizStore:
     def __init__(self, clock=time.time):
         self.rooms = {}
@@ -49,8 +57,9 @@ class QuizStore:
             text(q.get('topic'), 100)
             text(q.get('level'), 100)
             text(q.get('explain'), 2000)
-            require(type(q.get('page')) is int and q['page'] > 0, 'Thiếu trang nguồn.')
-            text(q.get('code'), 100)
+            require((type(q.get('page')) is int and q['page'] > 0) or
+                    (isinstance(q.get('code'), str) and q['code'].strip() not in ('', '—')),
+                    'Thiếu trang hoặc đoạn nguồn.')
         duration = data.get('duration', 30)
         require(type(duration) is int and duration in (15, 20, 30, 45, 60, 90), 'Thời gian không hợp lệ.')
         max_players = data.get('maxPlayers', 30)
@@ -188,7 +197,7 @@ class QuizStore:
             item['skipped'] += skipped
             item['total'] += total
             breakdown.append(dict(index=i, question=q['q'], correct=q['correct'], options=q['a'],
-                                  topic=q['topic'], difficulty=q['level'], source=dict(slide=q['page'], transcript=q['code']),
+                                  topic=q['topic'], difficulty=q['level'], source=question_source(q),
                                   explanation=q['explain'], counts=counts, skipped=skipped, total=total))
         for p in room['players'].values():
             correct = wrong = skipped = 0
@@ -226,7 +235,7 @@ class QuizStore:
             current = dict(index=room['index'], text=q['q'], options=q['a'], topic=q['topic'], difficulty=q['level'])
             if room['phase'] != 'question':
                 current.update(correct=q['correct'], explanation=q['explain'],
-                               source=dict(slide=q['page'], transcript=q['code']))
+                               source=question_source(q))
         me = next((p for p in report['players'] if player and p['id'] == player['id']), None)
         return dict(pin=room['pin'], title=room['title'], role=role, phase=room['phase'], seq=room['seq'],
                     round=room['round'], duration=room['duration'], maxPlayers=room.get('maxPlayers', 100), serverTime=self.clock() * 1000,
@@ -314,14 +323,8 @@ def main():
     parser.add_argument('--host', default='0.0.0.0')
     parser.add_argument('--port', type=int, default=8000)
     args = parser.parse_args()
-    server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f'Lessonleaf: http://localhost:{args.port} — cùng Wi-Fi: dùng IP LAN của máy host.', flush=True)
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        server.server_close()
+    import uvicorn
+    uvicorn.run('codebase.app.server:APP', host=args.host, port=args.port)
 
 
 if __name__ == '__main__':

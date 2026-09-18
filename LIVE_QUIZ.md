@@ -2,15 +2,16 @@
 
 ## Khởi động
 
-Không cần cài thư viện ngoài. Dùng Python 3.10 trở lên:
+Dùng Python 3.10 trở lên. Cài dependency cho ứng dụng tích hợp:
 
 ```bash
+python -m pip install -r requirements.txt
 python server.py
 ```
 
 Mở `http://localhost:8000`. Với nhiều thiết bị, giảng viên mở `http://<IP-LAN-của-máy-host>:8000` rồi chia sẻ link phòng; người học dùng cùng Wi-Fi và phải truy cập được cổng 8000 của máy host. `localhost` trên điện thoại là chính điện thoại đó, không phải máy giảng viên.
 
-Có thể đổi cổng bằng `python server.py --port 8080`. Server mặc định lắng nghe `0.0.0.0`; chỉ dùng trên một máy với `--host 127.0.0.1` nếu cần. Mở trực tiếp file HTML vẫn dùng được trình tạo quiz, nhưng Live Quiz cần server này. Không dùng `python -m http.server` vì server tĩnh không có API phòng chơi.
+Có thể đổi cổng bằng `python server.py --port 8080`. Server mặc định lắng nghe `0.0.0.0`; chỉ dùng trên một máy với `--host 127.0.0.1` nếu cần. Trình tạo quiz và Live Quiz đều cần server này; cấu hình API key trong `.env` để phân tích tài liệu và tạo quiz. Không dùng `python -m http.server` vì server tĩnh không có API phòng chơi.
 
 ## Giảng viên
 

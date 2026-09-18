@@ -1,6 +1,44 @@
-## Chạy ứng dụng Knowledge-to-Lesson
+## Chạy ứng dụng Lessonleaf (UI + AI Backend + Live Quiz)
 
-Chạy `python server.py`, mở `http://localhost:8000`. Xem [hướng dẫn Live Quiz](LIVE_QUIZ.md) để tạo phòng và cho người học tham gia cùng mạng.
+Yêu cầu Python 3.10 trở lên. Chạy từ thư mục gốc của repo:
+
+```bash
+python -m pip install -r requirements.txt
+# Chỉ tạo .env nếu chưa có; điền API key và model theo .env.example.
+python server.py
+```
+
+Mở http://localhost:8000. Lệnh phát triển có tự reload:
+
+```bash
+python -m uvicorn app.server:APP --reload --port 8000 --app-dir codebase
+```
+
+`python server.py --host 0.0.0.0 --port 8000` cho phép người học cùng mạng vào phòng.
+Không chạy bằng server tĩnh hoặc mở HTML trực tiếp: UI cần API trên cùng server.
+
+1. Thêm tài liệu PDF, Markdown hoặc TXT (tối đa 20 MB). Chờ phân tích xong.
+2. Chọn **Nguồn tạo quiz**; để ghép, đánh dấu 2–3 tài liệu rồi bấm **Ghép tài liệu**.
+3. Chọn số câu, độ khó và chủ đề, rồi tạo quiz từ graph có bằng chứng.
+4. Xem nguồn, sửa/loại/duyệt; sửa câu hỏi sẽ yêu cầu duyệt lại. Bù câu dùng nguồn và cấu hình của bộ quiz ban đầu.
+5. Xuất câu đã duyệt hoặc bấm **Play Quiz** để mở phòng. Xem [hướng dẫn Live Quiz](LIVE_QUIZ.md).
+
+Tài liệu, graph và cache lưu ở `appdata/`. Upload cùng nội dung dùng lại cache;
+xóa tài liệu làm graph ghép liên quan hết hiệu lực. Phòng Live Quiz lưu trong RAM,
+mất khi restart/reload server. Quiz đang soạn chưa được lưu khi tải lại trang.
+AI cần API key hợp lệ; PDF scan chưa có OCR. `.env` và `appdata/` được bỏ qua bởi Git.
+
+Các file chính: `index1.html` (UI), `live.js`/`live.css` (phòng chơi),
+`codebase/app/server.py` (API chung), `codebase/app/pipeline.py` (AI/cache),
+`server.py` (logic phòng chơi và lệnh khởi động).
+
+Kiểm thử (AI được giả lập, không gọi API trả phí):
+
+```bash
+python -m unittest discover -s tests -p 'test_*.py' -v
+node tests/r3-ui.test.js
+node tests/live-ui.test.js
+```
 
 # Mini Hackathon AI — Batch 04 · Lớp 3A
 

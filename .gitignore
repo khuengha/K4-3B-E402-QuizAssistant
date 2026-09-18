@@ -1,5 +1,65 @@
+# Local secrets and credentials (keep safe configuration templates)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.envrc
+*.key
+*.pem
+*.p12
+*.pfx
+/secrets/
+/credentials/
+
+# Uploaded documents, AI traces, cached graphs and generated quiz data
+/appdata/
+/ingestion/
+/extraction/
+/quiz/
+/graph_explorer.html
+/lessonleaf-quiz.json
+
+# Local source documents and reference images
+/2bb211550888131c1c80ca68abac4131_MIT15_S12F18_ses3-trang.pdf
+/Số tay Hackathon K4 - Dành cho học viên.pdf
+/image.png
+
+# Python environments, bytecode and packaging output
 __pycache__/
 *.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+/build/
+/dist/
 
-/image.png
-/Số tay Hackathon K4 - Dành cho học viên.pdf
+# Test, lint and browser automation artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+playwright-report/
+test-results/
+node_modules/
+
+# Logs, temporary files and local databases
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+*.sqlite
+*.sqlite3
+*.db
+
+# Machine-specific editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
